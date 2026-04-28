@@ -18,7 +18,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+# Whisper + torch wheels are large; be resilient to slow networks.
+RUN pip install --retries 10 --default-timeout 600 --progress-bar off -r requirements.txt
 
 COPY app ./app
 

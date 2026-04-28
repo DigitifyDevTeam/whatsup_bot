@@ -1,3 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+# Force CPU-only PyTorch to avoid huge CUDA wheels in Docker builds
+torch==2.2.2+cpu; platform_system == "Linux" and platform_machine == "x86_64"
 fastapi>=0.115.0
 uvicorn>=0.34.0
 httpx>=0.28.0

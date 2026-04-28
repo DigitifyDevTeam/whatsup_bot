@@ -1,0 +1,151 @@
+{,"time":"2026-04-28T12:17:21.483Z","message":"Starting WhatsApp-to-Teamwork bridge..."}
+{,"time":"2026-04-28T12:17:21.485Z","apiUrl":"http://backend:8000","skipBackend":false,"processOwnMessages":true,"message":"Bridge configuration"}
+{,"time":"2026-04-28T12:17:21.719Z","message":"Bridge is running. Scan QR code if this is a first connection."}
+{,"time":"2026-04-28T12:17:22.748Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:23.431Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:24.321Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:24.817Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:25.880Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:26.389Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:27.806Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:27.988Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:28.934Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:29.684Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:30.835Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:31.497Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:32.629Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:33.099Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:34.477Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:34.933Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:35.810Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:36.368Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:37.419Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:38.117Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:39.027Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:39.592Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:40.570Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:41.044Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:42.222Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:42.406Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:43.291Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:43.865Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:45.012Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:45.231Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:46.301Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:46.767Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:47.640Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:48.231Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:49.519Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:49.937Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:51.293Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:51.567Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:52.779Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:53.097Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:54.142Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:54.463Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:55.383Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:56.173Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:57.352Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:57.810Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:17:58.684Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:17:59.201Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:00.104Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:00.690Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:01.895Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:02.174Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:03.231Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:03.849Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:04.846Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:05.460Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:06.502Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:07.089Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:08.148Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:08.661Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:09.827Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:10.461Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:11.767Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:12.320Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:13.437Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:13.681Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:14.545Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:14.974Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:16.674Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:17.278Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:18.490Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:19.196Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:20.209Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:20.740Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:21.861Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:22.073Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:23.295Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:23.765Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:24.724Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:25.460Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:26.599Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:26.814Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:27.836Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:28.650Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:29.529Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:30.129Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:31.273Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:31.772Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:32.741Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:33.154Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:34.033Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:34.543Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:35.491Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:36.125Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:37.551Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:38.732Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:39.862Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:40.366Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:41.363Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:42.111Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:43.086Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:43.519Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:45.023Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:45.903Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:46.846Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:47.311Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:48.370Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:48.797Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:49.793Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:49.954Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:51.325Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:51.732Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:52.822Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:53.751Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:55.131Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:55.471Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:56.700Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:57.264Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:58.116Z","message":"WhatsApp connection established"}
+{,"time":"2026-04-28T12:18:58.722Z","message":"Connection closed, reconnecting..."}
+{,"time":"2026-04-28T12:18:59.843Z","message":"WhatsApp connection established"}
+Error: Connection Closed
+    at sendRawMessage (file:///app/node_modules/@whiskeysockets/baileys/src/Socket/socket.ts:117:10)
+    at sendNode (file:///app/node_modules/@whiskeysockets/baileys/src/Socket/socket.ts:138:10)
+    at file:///app/node_modules/@whiskeysockets/baileys/src/Socket/messages-send.ts:647:10
+    at async Object.transaction (file:///app/node_modules/@whiskeysockets/baileys/src/Utils/auth-utils.ts:157:14)
+    at async relayMessage (file:///app/node_modules/@whiskeysockets/baileys/src/Socket/messages-send.ts:416:3)
+    at async sendPeerDataOperationMessage (file:///app/node_modules/@whiskeysockets/baileys/src/Socket/messages-send.ts:308:17)
+    at async sendRetryRequest (file:///app/node_modules/@whiskeysockets/baileys/src/Socket/messages-recv.ts:187:18)
+    at async file:///app/node_modules/@whiskeysockets/baileys/src/Socket/messages-recv.ts:830:9
+    at async file:///app/node_modules/@whiskeysockets/baileys/src/Utils/make-mutex.ts:18:21 {
+  data: null,
+  isBoom: true,
+  isServer: false,
+  output: {
+    statusCode: 428,
+    payload: {
+      statusCode: 428,
+      error: 'Precondition Required',
+      message: 'Connection Closed'
+    },
+    headers: {}
+  }
+}
+{,"time":"2026-04-28T12:19:01.916Z","message":"Starting WhatsApp-to-Teamwork bridge..."}
+{,"time":"2026-04-28T12:19:01.917Z","apiUrl":"http://backend:8000","skipBackend":false,"processOwnMessages":true,"message":"Bridge configuration"}
+{,"time":"2026-04-28T12:19:02.086Z","message":"Bridge is running. Scan QR code if this is a first connection."}
+{,"time":"2026-04-28T12:19:03.218Z","message":"WhatsApp connection established"}
