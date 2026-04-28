@@ -1,0 +1,133 @@
+# 24/7 production stack for WhatsApp -> Teamwork pipeline.
+# Services:
+#   - ollama       : LLaMA 3.1 8B server (port 11434)
+#   - ollama_init  : one-shot job that pulls llama3.1:8b on first start
+#   - backend      : FastAPI (port 8000), runs uvicorn, logs -> ./backend/logs/backend.log
+#   - bridge       : Node.js WhatsApp listener, logs -> ./bridge/logs/bridge.log
+#
+# How to view logs:
+#   - Live (any service):   docker compose logs -f backend
+#                           docker compose logs -f bridge
+#                           docker compose logs -f ollama
+#   - Persisted log files:  ./backend/logs/backend.log
+#                           ./bridge/logs/bridge.log
+#   - Structured app logs:  ./backend/logs/transcripts.jsonl
+#                           ./backend/logs/tasks_output.jsonl
+#
+# First-run setup:
+#   1. docker compose up -d
+#   2. docker compose logs -f bridge   # scan QR code on first connection
+#   3. Auth is persisted in ./bridge/auth_state (no re-scan after restart)
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: whatsbot_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    # ----- Optional: NVIDIA GPU support -----
+    # Requires nvidia-container-toolkit on the host.
+    # Uncomment the block below if a GPU is available.
+    #
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  ollama_init:
+    image: ollama/ollama:latest
+    container_name: whatsbot_ollama_init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Pulling llama3.1:8b (will skip if already cached)..."
+        ollama pull llama3.1:8b
+        echo "Model ready."
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: whatsbot_backend
+    restart: unless-stopped
+    depends_on:
+      ollama_init:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override .env values to use Docker DNS (service name)
+      LLAMA_ENDPOINT: "http://ollama:11434"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      # Live source mount so --reload picks up changes
+      - ./backend/app:/app/app
+      # Persisted logs (uvicorn output + structured JSONL logs)
+      - ./backend/logs:/app/logs
+      # Persist Whisper model cache so it isn't redownloaded on every restart
+      - whisper_cache:/root/.cache/whisper
+    # Run uvicorn AND tee its stdout/stderr into a persistent log file.
+    command:
+      - sh
+      - -c
+      - |
+        mkdir -p /app/logs
+        exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 2>&1 \
+          | tee -a /app/logs/backend.log
+
+  bridge:
+    build:
+      context: ./bridge
+    container_name: whatsbot_bridge
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./bridge/.env
+    environment:
+      # Override .env values to use Docker DNS (service name)
+      API_URL: "http://backend:8000"
+      WHATSAPP_SESSION_PATH: "/app/auth_state"
+    volumes:
+      # Live source mount (optional, comment out for stricter prod immutability)
+      - ./bridge/src:/app/src
+      # Persisted WhatsApp session (so QR is only scanned once)
+      - ./bridge/auth_state:/app/auth_state
+      # Persisted audio files coming in from voice notes
+      - ./bridge/audio_files:/app/audio_files
+      # Persisted bridge logs
+      - ./bridge/logs:/app/logs
+    # TTY required so the QR code renders correctly on first run.
+    stdin_open: true
+    tty: true
+    command:
+      - sh
+      - -c
+      - |
+        mkdir -p /app/logs
+        exec npx ts-node src/index.ts 2>&1 \
+          | tee -a /app/logs/bridge.log
+
+volumes:
+  ollama_models:
+  whisper_cache:

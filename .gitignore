@@ -1,0 +1,21 @@
+# Node
+bridge/node_modules/
+bridge/dist/
+bridge/auth_state/
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/**/__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp audio files
+*.ogg

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+auth_state/
+audio_files/
+logs/
+.env
+.env.*
+.git/
+.gitignore
+Dockerfile
+.dockerignore

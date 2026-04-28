@@ -1,0 +1,249 @@
+from typing import Optional
+import os
+import json
+import hashlib
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
+
+from app.models.task import TaskData
+from app.services import ai_service, teamwork_service, whisper_service
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+router = APIRouter()
+_MESSAGE_DEDUPE_CACHE: dict[str, float] = {}
+
+
+def _normalize_text_for_dedupe(text: str) -> str:
+    return " ".join((text or "").strip().lower().split())
+
+
+def _build_message_fingerprint(sender_id: str, raw_text: str) -> str:
+    normalized = _normalize_text_for_dedupe(raw_text)
+    payload = f"{sender_id}::{normalized}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _is_duplicate_recent_message(sender_id: str, raw_text: str) -> bool:
+    """
+    Prevent duplicate task creation when the same sender sends
+    the same content repeatedly in a short time window.
+    """
+    dedupe_window_seconds = int(os.getenv("MESSAGE_DEDUPE_WINDOW_SECONDS", "900"))
+    now_ts = datetime.now(timezone.utc).timestamp()
+    fingerprint = _build_message_fingerprint(sender_id, raw_text)
+    previous_ts = _MESSAGE_DEDUPE_CACHE.get(fingerprint)
+    _MESSAGE_DEDUPE_CACHE[fingerprint] = now_ts
+
+    if previous_ts is None:
+        return False
+    return (now_ts - previous_ts) <= dedupe_window_seconds
+
+
+def _store_transcript(
+    sender_id: str,
+    sender_participant_jid: Optional[str],
+    transcription_source: str,
+    raw_text: str,
+) -> None:
+    """Persist transcriptions as JSONL so they can be reviewed later."""
+    transcript_log_path = os.getenv("TRANSCRIPT_LOG_PATH", "logs/transcripts.jsonl")
+    log_dir = os.path.dirname(transcript_log_path)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "sender_id": sender_id,
+        "sender_participant_jid": sender_participant_jid,
+        "transcription_source": transcription_source,
+        "raw_text": raw_text,
+    }
+    with open(transcript_log_path, "a", encoding="utf-8") as transcript_file:
+        transcript_file.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
+def _store_task_output(
+    sender_id: str,
+    sender_participant_jid: Optional[str],
+    transcription_source: str,
+    raw_text: str,
+    task: TaskData,
+) -> None:
+    """Persist extracted structured tasks as JSONL."""
+    task_log_path = os.getenv("TASK_OUTPUT_LOG_PATH", "logs/tasks_output.jsonl")
+    log_dir = os.path.dirname(task_log_path)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "sender_id": sender_id,
+        "sender_participant_jid": sender_participant_jid,
+        "transcription_source": transcription_source,
+        "raw_text": raw_text,
+        "task": task.model_dump(),
+    }
+    with open(task_log_path, "a", encoding="utf-8") as task_file:
+        task_file.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
+@router.get("/teamwork-health")
+async def teamwork_health() -> dict:
+    try:
+        return await teamwork_service.get_teamwork_health()
+    except Exception as e:
+        logger.error(f"Teamwork health check failed: {e}")
+        raise HTTPException(status_code=502, detail=f"Teamwork health check failed: {e}")
+
+
+@router.post("/process-message")
+async def process_message(
+    sender_id: str = Form(...),
+    sender_participant_jid: Optional[str] = Form(None),
+    message: Optional[str] = Form(None),
+    audio_file: Optional[UploadFile] = File(None),
+) -> dict:
+    logger.info(
+        f"Received message from {sender_id} | "
+        f"text={'yes' if message else 'no'} | "
+        f"audio={'yes' if audio_file else 'no'}"
+    )
+
+    text = message
+    transcription_source = "text"
+
+    if audio_file:
+        try:
+            audio_data = await audio_file.read()
+            text = await whisper_service.transcribe_upload(
+                audio_data, audio_file.filename or "audio.ogg"
+            )
+            transcription_source = "audio_whisper"
+            logger.info(f"Transcribed audio for {sender_id}: {text[:100]}...")
+
+            target_language = os.getenv("AUDIO_OUTPUT_LANGUAGE", "fr").strip().lower()
+            if target_language in {"fr", "french", "francais", "français"}:
+                translated_text = await ai_service.translate_to_french(text)
+                if translated_text:
+                    text = translated_text
+                    transcription_source = "audio_whisper_translated_fr"
+                    logger.info(f"French transcript for {sender_id}: {text[:100]}...")
+        except Exception as e:
+            logger.error(f"Whisper transcription failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Transcription failed: {e}")
+
+    if not text:
+        raise HTTPException(status_code=400, detail="No message content provided")
+
+    # Keep a plain-text copy for clients that need raw transcription output.
+    raw_text = text
+    _store_transcript(sender_id, sender_participant_jid, transcription_source, raw_text)
+    logger.info(f"Stored transcript for {sender_id}: {raw_text}")
+    if _is_duplicate_recent_message(sender_id, raw_text):
+        logger.info(
+            "Duplicate message detected. Skipping AI extraction and Teamwork task creation."
+        )
+        return {
+            "status": "duplicate_ignored",
+            "sender_id": sender_id,
+            "raw_text": raw_text,
+            "transcription_source": transcription_source,
+            "task": None,
+            "teamwork_response": None,
+        }
+
+    whisper_only = os.getenv("WHISPER_ONLY", "false").lower() == "true"
+    fallback_to_transcript = (
+        os.getenv("FALLBACK_TO_TRANSCRIPT_ON_AI_ERROR", "true").lower() == "true"
+    )
+
+    if whisper_only:
+        logger.info("WHISPER_ONLY=true, returning raw text without AI extraction")
+        return {
+            "status": "ok_transcription_only",
+            "sender_id": sender_id,
+            "raw_text": raw_text,
+            "transcription_source": transcription_source,
+            "task": None,
+            "teamwork_response": None,
+        }
+
+    try:
+        task: TaskData = await ai_service.extract_task(text)
+        logger.info(f"Extracted task: {task.model_dump_json()}")
+        _store_task_output(sender_id, sender_participant_jid, transcription_source, raw_text, task)
+        logger.info(f"Stored structured task output for {sender_id}")
+    except ValueError as e:
+        logger.error(f"Task extraction failed: {e}")
+        detail = str(e)
+        if "memory" in detail.lower() and (
+            "ollama" in detail.lower() or "model requires" in detail.lower()
+        ):
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"{detail} "
+                    "Free RAM or use a smaller model (e.g. `ollama pull llama3.2:3b` "
+                    "then set LLAMA_MODEL=llama3.2:3b or LLAMA_FALLBACK_MODEL=llama3.2:3b)."
+                ),
+            )
+        if fallback_to_transcript:
+            logger.warning(
+                "FALLBACK_TO_TRANSCRIPT_ON_AI_ERROR=true, returning raw text after AI failure"
+            )
+            return {
+                "status": "ok_transcription_fallback",
+                "sender_id": sender_id,
+                "raw_text": raw_text,
+                "transcription_source": transcription_source,
+                "task": None,
+                "teamwork_response": None,
+                "ai_error": detail,
+            }
+        raise HTTPException(status_code=422, detail=f"Task extraction failed: {e}")
+
+    has_teamwork_config = bool(os.getenv("TEAMWORK_DOMAIN")) and bool(
+        os.getenv("TEAMWORK_PROJECT_ID")
+    )
+    skip_teamwork = os.getenv("SKIP_TEAMWORK", "false").lower() == "true" or not has_teamwork_config
+    if skip_teamwork:
+        logger.info("SKIP_TEAMWORK=true, returning extracted task without Teamwork API call")
+        return {
+            "status": "ok_ai_only",
+            "sender_id": sender_id,
+            "raw_text": raw_text,
+            "transcription_source": transcription_source,
+            "task": task.model_dump(),
+            "teamwork_response": None,
+        }
+
+    try:
+        teamwork_response = await teamwork_service.create_task(task)
+    except Exception as e:
+        logger.error(f"Teamwork API failed: {e}")
+        raise HTTPException(status_code=502, detail=f"Teamwork API failed: {e}")
+
+    return {
+        "status": "ok",
+        "sender_id": sender_id,
+        "raw_text": raw_text,
+        "transcription_source": transcription_source,
+        "task": task.model_dump(),
+        "teamwork_response": teamwork_response,
+    }
+
+
+@router.get("/process-message")
+async def process_message_get_hint() -> dict:
+    return {
+        "status": "method_not_supported",
+        "detail": "Use POST /process-message with form data (sender_id, message and/or audio_file).",
+    }
+
+
+@router.get("/favicon.ico")
+async def favicon() -> Response:
+    return Response(status_code=204)
