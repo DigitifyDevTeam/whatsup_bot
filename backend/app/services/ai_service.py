@@ -45,9 +45,10 @@ Rules:
 - If unknown, use null
 - IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
 - IMPORTANT: Never output English for any textual field.
-- IMPORTANT: If the client message contains multiple independent actions, split them into `subtasks`.
-- IMPORTANT: Each subtask must be a concise action sentence in French.
-- IMPORTANT: If there is only one action, return `subtasks` as an empty array [].
+- IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
+- IMPORTANT: Only include `subtasks` when the client explicitly lists actions (bullets, numbering, or explicit separators).
+- IMPORTANT: Never invent, infer, paraphrase, or expand subtasks from intent.
+- IMPORTANT: If the message is not explicitly enumerated, return `subtasks` as an empty array [].
 
 Priority rules:
 - P0 = Critique, response < 1 hour, blocking incidents (payment, delivery, cart, server/product unavailable)
@@ -178,7 +179,7 @@ def _extract_json_object(text: str) -> str:
 
 
 def _normalize_task(task: TaskData, source_message: str) -> TaskData:
-    """Deduplicate and clean subtask text returned by the model."""
+    """Keep subtasks strictly extractive from explicit client list formatting."""
     normalized_subtasks: list[str] = []
     seen: set[str] = set()
 
@@ -194,61 +195,59 @@ def _normalize_task(task: TaskData, source_message: str) -> TaskData:
         seen.add(key)
         normalized_subtasks.append(cleaned)
 
-    derived_subtasks = _derive_subtasks_from_message(source_message)
-    final_subtasks = derived_subtasks or normalized_subtasks
+    explicit_subtasks = _extract_explicit_subtasks(source_message)
+    final_subtasks = explicit_subtasks if explicit_subtasks else []
 
-    # For multi-action client messages, keep full original message as parent body.
     corrected_tag = _infer_tag(source_message, task)
-
-    if len(final_subtasks) > 1:
-        full_message = " ".join(source_message.strip().split())
-        return task.model_copy(
-            update={
-                "description": full_message,
-                "client_request": full_message,
-                "subtasks": final_subtasks,
-                "tag": corrected_tag,
-            }
-        )
-
     return task.model_copy(update={"subtasks": final_subtasks, "tag": corrected_tag})
 
 
-def _derive_subtasks_from_message(source_message: str) -> list[str]:
+def _extract_explicit_subtasks(source_message: str) -> list[str]:
     """
-    Extract concrete action chunks from long messages.
-    This keeps promo/details in parent description and pushes actionable items
-    to subtasks.
+    Extract subtasks only when the client explicitly enumerates them.
+    No semantic inference: list markers/numbers/newlines only.
     """
-    text = " ".join(source_message.strip().split())
-    if not text:
+    raw = source_message or ""
+    if not raw.strip():
         return []
 
-    patterns = [
-        # Full promo instruction including scope, date window, and promo code.
-        r"(Bandeau Promo\s*:\s*Black Friday\s*:\s*-15%\s+sur tout le site\s*!\s*Du\s*26/11/2024\s*au\s*02/12/2024\s*minuit,\s*profitez de\s*-15%\s*avec le code\s*[A-Z0-9_-]+\s+Ne laissez pas passer cette offre exclusive)",
-        # Fallback generic promo sentence if wording slightly differs.
-        r"(Bandeau Promo\s*:\s*Black Friday[^.]+?Ne laissez pas passer cette offre exclusive)",
-        # conception de l'image de couverture de Sport Auto
-        r"(conception de l['’]image de couverture de[^.]+?)(?=\s+et\s+n['’]oublie|\s*\.$|$)",
-        # Remettre la Suisse ... européens
-        r"(Remettre la Suisse en tant que pays de livraison possible avec les mêmes règles que les autres pays européens)",
-    ]
-
-    subtasks: list[str] = []
+    lines = [line.strip() for line in raw.splitlines() if line.strip()]
+    explicit: list[str] = []
     seen: set[str] = set()
-    for pattern in patterns:
-        match = re.search(pattern, text, flags=re.IGNORECASE)
-        if not match:
+
+    for line in lines:
+        bullet_match = re.match(r"^(?:[-*•]\s+|\d+[.)]\s+)(.+)$", line)
+        if not bullet_match:
             continue
-        candidate = " ".join(match.group(1).strip().split()).lstrip("-").strip()
+        candidate = " ".join(bullet_match.group(1).strip().split())
+        if not candidate:
+            continue
         key = candidate.lower()
         if key in seen:
             continue
         seen.add(key)
-        subtasks.append(candidate)
+        explicit.append(candidate)
 
-    return subtasks
+    # Fallback: single-line enumerations using explicit delimiters.
+    if explicit:
+        return explicit
+
+    normalized = " ".join(raw.strip().split())
+    if ";" in normalized:
+        parts = [part.strip(" -") for part in normalized.split(";")]
+        parts = [part for part in parts if part]
+        if len(parts) >= 2:
+            cleaned_parts: list[str] = []
+            seen_parts: set[str] = set()
+            for part in parts:
+                key = part.lower()
+                if key in seen_parts:
+                    continue
+                seen_parts.add(key)
+                cleaned_parts.append(part)
+            return cleaned_parts
+
+    return []
 
 
 def _infer_tag(source_message: str, task: TaskData) -> str:

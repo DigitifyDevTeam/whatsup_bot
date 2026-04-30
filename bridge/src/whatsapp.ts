@@ -280,14 +280,88 @@ function shouldIgnoreTextMessage(text: string | null): boolean {
 
   const normalizedText = text.trim().toLowerCase();
   if (!normalizedText) return false;
+  const compactText = normalizedText.replace(/\s+/g, " ").trim();
+  const thanksWords = [
+    "merci",
+    "merci beaucoup",
+    "mrc",
+    "thx",
+    "thanks",
+    "thank you",
+    "c'est gentil",
+    "c’est gentil",
+    "nickel",
+  ];
+  const compactAlnum = compactText.replace(/[!?.;,:-]+/g, "").trim();
+  if (thanksWords.includes(compactAlnum)) {
+    return true;
+  }
+  // User requirement: any question should not become a task.
+  if (text.includes("?")) {
+    return true;
+  }
+  const questionStarters = [
+    "qui",
+    "que",
+    "qu'est-ce que",
+    "qu’est-ce que",
+    "qu'est ce que",
+    "qu’est ce que",
+    "quoi",
+    "quand",
+    "ou",
+    "où",
+    "pourquoi",
+    "comment",
+    "combien",
+    "est-ce que",
+    "est ce que",
+    "peux-tu",
+    "peut-tu",
+    "tu peux",
+    "vous pouvez",
+    "on peut",
+    "dois-je",
+    "doit-on",
+    "is it",
+    "can you",
+    "could you",
+  ];
+  if (questionStarters.some((starter) => compactText.startsWith(`${starter} `) || compactText === starter)) {
+    return true;
+  }
 
-  const ignoredWords = new Set(["ok", "bonjour", "merci"]);
+  const ignoredWords = new Set(["ok", "bonjour", "merci", "oui", "yes", "recu", "reçu"]);
   if (ignoredWords.has(normalizedText)) {
     return true;
   }
 
   const tokens = normalizedText.split(/\s+/).filter(Boolean);
-  return tokens.length === 1;
+  if (tokens.length === 1) {
+    return true;
+  }
+
+  const lowSignalPatterns: RegExp[] = [
+    /^ok\s+tu\s+me\s+dis$/i,
+    /^tu\s+me\s+tiens\s+au\s+courant$/i,
+    /^tiens[\s-]?moi\s+au\s+courant$/i,
+    /^je\s+m['’]en\s+occupe(?:\s+plus\s+tard)?(?:\s+ca\s+peut\s+tarder)?$/i,
+    /^on\s+voit\s+ca\s+plus\s+tard$/i,
+  ];
+  if (lowSignalPatterns.some((pattern) => pattern.test(normalizedText))) {
+    return true;
+  }
+
+  if (
+    tokens.length <= 8 &&
+    (normalizedText.includes("plus tard") ||
+      normalizedText.includes("au courant") ||
+      normalizedText.includes("tu me dis"))
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function normalizeTextEncoding(text: string): string {

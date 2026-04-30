@@ -24,6 +24,34 @@ _ACK_ONLY_RE = re.compile(
     r")+?$",
     re.IGNORECASE,
 )
+_LOW_SIGNAL_PHRASES_RE = re.compile(
+    r"^(?:"
+    r"(?:ok|okay|okk|okkk|oui|yes|merci|thanks|reçu|recu|vu|noté|note|validé|valide)"
+    r"(?:[\s,;:!?.-]+)?"
+    r"|(?:ok\s+tu\s+me\s+dis)"
+    r"|(?:tu\s+me\s+tiens\s+au\s+courant)"
+    r"|(?:tiens[\s-]?moi\s+au\s+courant)"
+    r"|(?:je\s+m['’]en\s+occupe(?:\s+plus\s+tard)?(?:\s+ca\s+peut\s+tarder)?)"
+    r"|(?:on\s+voit\s+ça\s+plus\s+tard)"
+    r"|(?:d['’]accord\s+je\s+g[ée]re)"
+    r")+$",
+    re.IGNORECASE,
+)
+_THANKS_ONLY_RE = re.compile(
+    r"^(?:"
+    r"(?:merci(?:\s+beaucoup)?|mrc|thx|thanks|thank you|c['’]?est gentil|nickel)"
+    r"(?:[\s,;:!?.-]+)?"
+    r")+?$",
+    re.IGNORECASE,
+)
+_QUESTION_START_RE = re.compile(
+    r"^(?:"
+    r"qui|que|qu['’]est-ce que|qu['’]est ce que|quoi|quand|ou|où|"
+    r"pourquoi|comment|combien|est-ce que|est ce que|peux-tu|peut-tu|"
+    r"tu peux|vous pouvez|on peut|dois-je|doit-on|is it|can you|could you"
+    r")\b",
+    re.IGNORECASE,
+)
 
 
 def _normalize_text_for_dedupe(text: str) -> str:
@@ -63,10 +91,63 @@ def _is_non_action_message(raw_text: str) -> bool:
         return True
 
     token_count = len(normalized.split())
+    if _THANKS_ONLY_RE.fullmatch(normalized):
+        return True
+    # User requirement: any question should not create a task.
+    if "?" in raw_text:
+        return True
+    if token_count <= 14 and _QUESTION_START_RE.match(normalized):
+        return True
     if token_count <= 6 and _ACK_ONLY_RE.fullmatch(normalized):
+        return True
+    if token_count <= 12 and _LOW_SIGNAL_PHRASES_RE.fullmatch(normalized):
+        return True
+    # Short status updates with no concrete action are often low-signal.
+    if token_count <= 8 and any(
+        phrase in normalized
+        for phrase in (
+            "plus tard",
+            "au courant",
+            "tu me dis",
+            "je m'en occupe",
+            "je m’en occupe",
+        )
+    ):
         return True
 
     return False
+
+
+def _is_low_signal_extracted_task(raw_text: str, task: TaskData) -> bool:
+    """
+    Safety net: avoid creating Teamwork tasks when AI over-interprets vague input.
+    """
+    normalized = _normalize_text_for_dedupe(raw_text)
+    token_count = len(normalized.split())
+    if token_count > 12:
+        return False
+
+    if _is_non_action_message(raw_text):
+        return True
+
+    # If source message is very short but LLM generated multiple subtasks, treat as hallucinated.
+    if token_count <= 8 and len(task.subtasks) > 0:
+        return True
+
+    # If both title and description barely overlap with source, likely over-inference.
+    source_tokens = {tok for tok in re.findall(r"\w+", normalized) if len(tok) >= 3}
+    generated_tokens = {
+        tok
+        for tok in re.findall(
+            r"\w+",
+            _normalize_text_for_dedupe(f"{task.title} {task.description} {task.client_request}"),
+        )
+        if len(tok) >= 3
+    }
+    if not source_tokens:
+        return True
+    overlap_ratio = len(source_tokens & generated_tokens) / len(source_tokens)
+    return overlap_ratio < 0.35
 
 
 def _store_transcript(
@@ -214,6 +295,18 @@ async def process_message(
     try:
         task: TaskData = await ai_service.extract_task(text)
         logger.info(f"Extracted task: {task.model_dump_json()}")
+        if _is_low_signal_extracted_task(raw_text, task):
+            logger.info(
+                "Low-signal message detected after AI extraction. Skipping Teamwork task creation."
+            )
+            return {
+                "status": "ignored_low_signal_after_ai",
+                "sender_id": sender_id,
+                "raw_text": raw_text,
+                "transcription_source": transcription_source,
+                "task": None,
+                "teamwork_response": None,
+            }
         _store_task_output(sender_id, sender_participant_jid, transcription_source, raw_text, task)
         logger.info(f"Stored structured task output for {sender_id}")
     except ValueError as e:
