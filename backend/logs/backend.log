@@ -221,3 +221,539 @@ INFO:     Waiting for application startup.
 {"timestamp": "2026-04-28T12:59:56.747172+00:00", "level": "INFO", "logger": "app.main", "message": "FastAPI backend started"}
 INFO:     Application startup complete.
 INFO:     172.20.0.1:57284 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.20.0.1:33772 - "GET /health HTTP/1.1" 200 OK
+{"timestamp": "2026-04-28T13:07:32.286440+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=yes | audio=no"}
+{"timestamp": "2026-04-28T13:07:32.288167+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Stored transcript for 120363356487766968@g.us: @91830897098846 tu peux me rappeler, on a enfin les acc\u00e8s de la BNP pour le syst\u00e8me de bnp !"}
+{"timestamp": "2026-04-28T13:07:32.311635+00:00", "level": "INFO", "logger": "app.services.ai_service", "message": "Calling Ollama chat: model=llama3.1:8b format_json=True"}
+{"timestamp": "2026-04-28T13:08:29.207547+00:00", "level": "INFO", "logger": "app.services.ai_service", "message": "Task extracted successfully on attempt 1 (llama3.1:8b)"}
+{"timestamp": "2026-04-28T13:08:29.208460+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Extracted task: {\"title\":\"Configurer BNP\",\"description\":\"Activer les acc\u00e8s bancaires BNP sur Origine CBD\",\"client_request\":\"configurer les acc\u00e8s bancaires de la BNP\",\"deadline\":null,\"priority\":\"P1\",\"tag\":\"Custom DEV\",\"subtasks\":[\"Configurer les param\u00e8tres de paiement avec la BNP\"]}"}
+{"timestamp": "2026-04-28T13:08:29.213589+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Stored structured task output for 120363356487766968@g.us"}
+{"timestamp": "2026-04-28T13:08:29.778674+00:00", "level": "INFO", "logger": "app.services.teamwork_service", "message": "Creating Teamwork task: Configurer BNP in tasklist 3767994"}
+{"timestamp": "2026-04-28T13:08:30.367571+00:00", "level": "INFO", "logger": "app.services.teamwork_service", "message": "Teamwork task created: {'task': {'id': 42448129, 'name': '[Custom DEV] Configurer BNP', 'description': '[Tag: Custom DEV] [Priority: P1]\\n\\nActiver les acc\u00e8s bancaires BNP sur Origine CBD', 'descriptionContentType': 'TEXT', 'priority': 'medium', 'hasDeskTickets': False, 'progress': 0, 'displayOrder': 2034, 'decimalDisplayOrder': 0, 'crmDealIds': None, 'tagIds': None, 'tags': None, 'updatedAt': '2026-04-28T13:12:22.746113023Z', 'updatedBy': 169889, 'deletedAt': None, 'deletedBy': None, 'parentTask': None, 'isPrivate': 0, 'lockdown': None, 'status': 'new', 'tasklist': {'id': 3767994, 'type': 'tasklists'}, 'startDate': None, 'dueDate': None, 'startDateOffset': None, 'dueDateOffset': None, 'dueDateBase': None, 'estimateMinutes': 0, 'accumulatedEstimatedMinutes': 0, 'assignees': [], 'commentFollowers': [], 'changeFollowers': [], 'completeFollowers': [], 'attachments': [], 'notify': False, 'isArchived': False, 'capacities': None, 'proofs': None, 'userPermissions': {'canEdit': True, 'canComplete': False, 'canLogTime': False, 'canViewEstTime': True, 'canAddSubtasks': False}, 'createdBy': 169889, 'createdAt': '2026-04-28T13:12:22.746113023Z', 'sequence': None, 'dateUpdated': '2026-04-28T13:12:22.746113023Z', 'parentTaskId': 0, 'tasklistId': 3767994, 'assigneeUserIds': None, 'assigneeUsers': [], 'assigneeCompanyIds': None, 'assigneeCompanies': [], 'assigneeTeamIds': None, 'assigneeTeams': [], 'assigneeJobRoleIds': None, 'assigneeJobRoles': [], 'createdByUserId': 169889, 'sequenceId': None}, 'meta': {}, 'included': {}}"}
+INFO:     172.20.0.3:43716 - "POST /process-message HTTP/1.1" 200 OK
+INFO:     172.20.0.1:40856 - "GET / HTTP/1.1" 404 Not Found
+{"timestamp": "2026-04-28T15:25:18.704805+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:18.714915+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_sg0z6rpi/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:18.718042+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:19.723171+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:20.781808+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:20.782370+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_w26bz87e/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:20.782639+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:21.293365+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:23.308351+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:23.309048+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_o9wxzr34/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:23.309168+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:23.856478+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:25.873732+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:25.875958+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_sb9t01yb/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:25.876023+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:26.308408+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:27.324290+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:27.325062+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_feo40tik/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:27.325223+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:27.862310+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:29.875955+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:29.876580+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_6846awlq/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:29.876654+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:30.445679+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:34.457289+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:34.457994+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_qh8a7rwe/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:34.458088+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:35.068269+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:36.082175+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:36.084135+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_uq59sx6p/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:36.084408+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:36.654489+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:38.675071+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:38.676014+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_j4gznnik/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:38.676112+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:39.247354+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:50376 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:47.290669+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:47.291604+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_pazn7unp/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:47.291764+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:47.953266+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42470 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:48.969238+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:48.970355+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_maw47h_o/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:48.970581+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:49.601971+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42470 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:25:51.643095+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:25:51.647472+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_g36e74u9/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:25:51.648268+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:25:52.320742+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42470 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:08.355476+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:08.356118+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_rc3lc9sd/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:08.356171+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:08.995572+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46100 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:10.013937+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:10.014841+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_fyjiusyy/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:10.014935+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:10.534168+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46100 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:12.550545+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:12.552075+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_grnjb91r/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:12.552225+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:13.116274+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46100 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:45.134014+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:45.134530+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_dkc4625k/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:45.134607+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:45.743401+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:33490 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:46.751689+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:46.752357+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_bcq3c992/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:46.752480+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:47.235478+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:33490 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:26:49.249295+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:26:49.249727+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_9sq5o5vp/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:26:49.249833+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:26:49.810213+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:33490 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:27:49.828507+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:27:49.830328+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_5mq5dn7f/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:27:49.830391+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:27:50.482091+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:27:51.493055+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:27:51.493645+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_f8y6ayza/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:27:51.493732+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:27:52.080360+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:27:54.098907+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:27:54.103555+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_181mhukl/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:27:54.104049+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:27:54.664499+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:28:54.674646+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:28:54.676783+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_nd6ajshn/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:28:54.676857+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:28:55.289194+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:28:56.300081+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:28:56.300571+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_2bu2lbug/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:28:56.300617+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:28:56.810608+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:28:58.823673+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:28:58.824299+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_np4e_wxu/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:28:58.824395+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:28:59.390691+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44180 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:29:59.401013+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:29:59.404028+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_x08kjthm/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:29:59.404096+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:30:00.056633+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55562 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:30:01.073699+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:30:01.075337+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_fa5zks7j/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:30:01.075446+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:30:01.593297+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55562 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:30:03.604285+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:30:03.604884+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_766k4mnv/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:30:03.605000+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:30:04.199357+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55562 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:31:04.232848+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:31:04.234201+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ljcqnorg/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:31:04.234561+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:31:04.759260+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:52728 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:31:05.775521+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:31:05.776252+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_wo8qdkei/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:31:05.776342+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:31:06.282008+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:52728 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:31:08.298149+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:31:08.299604+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_095u46vi/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:31:08.299807+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:31:08.873213+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:52728 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:32:08.888254+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:32:08.890393+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ivk9aehj/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:32:08.890520+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:32:09.478340+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43540 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:32:10.490834+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:32:10.491833+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_xcvue9t_/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:32:10.492018+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:32:11.049200+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43540 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:32:13.058495+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:32:13.058898+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_gnz8yjrs/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:32:13.058969+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:32:13.863611+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43540 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:33:13.880967+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:33:13.882123+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_gtxjmjzs/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:33:13.882211+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:33:14.487419+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:49096 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:33:15.497387+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:33:15.497835+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_jp1j5yu6/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:33:15.497875+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:33:16.015637+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:49096 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:33:18.030236+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:33:18.030748+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_3jv3azqj/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:33:18.030882+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:33:18.502833+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:49096 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:34:18.516976+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:34:18.517785+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_o_jwwbxg/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:34:18.517858+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:34:19.100278+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:47740 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:34:20.121427+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:34:20.121809+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_0j7vyq_y/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:34:20.121849+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:34:20.719183+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:47740 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:34:22.738271+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:34:22.739142+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_7ridzakd/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:34:22.739309+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:34:23.316891+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:47740 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:35:23.330025+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:35:23.330424+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_8jfmtg7t/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:35:23.330487+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:35:23.896601+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:35:24.914271+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:35:24.914935+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_l_rnj_dc/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:35:24.915005+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:35:25.394288+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:35:27.407591+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:35:27.409027+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_crp7bzqz/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:35:27.409103+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:35:28.009661+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:43730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:36:28.035641+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:36:28.037906+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_lstaj1xh/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:36:28.037966+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:36:28.661027+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:45548 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:36:29.672942+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:36:29.673727+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ogw_7979/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:36:29.673815+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:36:30.214208+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:45548 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:36:32.322276+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:36:32.322959+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_kw9rgr1n/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:36:32.323016+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:36:32.920310+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:45548 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:37:32.934855+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:37:32.936734+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_jxileu63/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:37:32.936820+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:37:33.540447+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:39452 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:37:34.550891+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:37:34.551436+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_qpcko8k6/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:37:34.551547+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:37:35.048272+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:39452 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:37:37.060074+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:37:37.060474+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ptuclwat/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:37:37.060528+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:37:37.647267+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:39452 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:38:37.661889+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:38:37.663226+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_yai3bxtp/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:38:37.663381+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:38:38.286901+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58074 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:38:39.298508+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:38:39.299297+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_jn4phtan/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:38:39.299389+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:38:39.717345+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58074 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:38:41.722184+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:38:41.722537+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_1tpaen33/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:38:41.722577+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:38:42.213829+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58074 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:39:42.229259+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:39:42.231261+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ie_d02t4/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:39:42.231327+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:39:42.853877+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:36076 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:39:43.867022+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:39:43.867433+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_8pumtt7y/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:39:43.867517+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:39:44.436005+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:36076 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:39:46.452151+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:39:46.452917+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_rf_9ft3q/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:39:46.453011+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:39:46.893518+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:36076 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:40:46.913598+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:40:46.916349+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_48f2wfll/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:40:46.916502+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:40:47.432661+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41946 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:40:48.439396+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:40:48.439859+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_195z74fa/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:40:48.439925+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:40:48.950565+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41946 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:40:50.968302+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:40:50.971011+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_y3zssuaj/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:40:50.971212+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:40:51.591943+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:41946 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:41:51.605934+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:41:51.609279+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_bmi07n7m/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:41:51.609351+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:41:52.174120+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42630 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:41:53.191232+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:41:53.191826+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_dvzuo3l9/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:41:53.191930+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:41:53.715306+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42630 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:41:55.729557+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:41:55.730463+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper__lme2o3r/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:41:55.730609+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:41:56.306619+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:42630 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:42:56.328274+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:42:56.329558+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_fxwhc0f7/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:42:56.329639+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:42:56.967826+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44442 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:42:57.976006+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:42:57.976376+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_etafdmvm/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:42:57.976430+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:42:58.505311+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44442 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:43:00.525599+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:43:00.526249+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_6blyl4yj/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:43:00.526653+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:43:01.160484+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44442 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:44:01.188848+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:44:01.190306+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_awynah97/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:44:01.190372+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:44:01.739744+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38424 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:44:02.747046+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:44:02.747410+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_7wd6el3p/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:44:02.747473+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:44:03.298472+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38424 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:44:05.308440+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:44:05.308828+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_s9afj89_/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:44:05.308872+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:44:05.847476+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38424 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:45:05.855439+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:45:05.856174+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_alr96_qy/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:45:05.856281+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:45:06.489869+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46700 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:45:07.507107+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:45:07.507646+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_buchc56r/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:45:07.507703+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:45:08.039761+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46700 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:45:10.058819+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:45:10.059191+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_zuffzb3n/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:45:10.059230+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:45:10.622581+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46700 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:46:10.643265+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:46:10.644548+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_kc2nzer9/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:46:10.644638+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:46:11.226943+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55554 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:46:12.240855+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:46:12.242597+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_pbatn565/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:46:12.242788+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:46:12.776687+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55554 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:46:14.785814+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:46:14.786197+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_os1q7uel/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:46:14.786254+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:46:15.317629+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55554 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:47:15.352999+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:47:15.355989+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_ntlp7f9w/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:47:15.356078+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:47:15.966703+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:57708 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:47:16.979576+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:47:16.980354+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_mg50xwdk/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:47:16.980447+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:47:17.385461+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:57708 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:47:19.396284+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:47:19.396791+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_1__e2oku/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:47:19.396848+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:47:19.855951+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:57708 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:48:19.872550+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:48:19.875209+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_0f3gbkzd/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:48:19.875365+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:48:20.503511+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34104 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:48:21.520619+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:48:21.521312+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_7w76_k58/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:48:21.521415+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:48:22.068980+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34104 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:48:24.088512+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:48:24.088908+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_xt9tsd4h/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:48:24.088955+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:48:24.530955+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34104 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:49:24.546737+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:49:24.549397+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_8jgv0h63/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:49:24.549469+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:49:25.054546+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58532 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:49:26.062137+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:49:26.062790+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_23msm_4s/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:49:26.062835+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:49:26.537617+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58532 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:49:28.552009+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:49:28.552870+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_dnpkzann/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:49:28.552957+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:49:29.139782+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:58532 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:50:29.164316+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:50:29.167888+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_o8aj_b7y/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:50:29.168035+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:50:29.794630+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:56730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:50:30.816839+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:50:30.817834+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_wwyxqljl/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:50:30.817944+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:50:31.337699+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:56730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:50:33.353921+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:50:33.354700+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_jq7gp9_5/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:50:33.354982+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:50:33.943472+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:56730 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:51:33.968028+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:51:33.970003+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_r00fcch4/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:51:33.970081+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:51:34.597381+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44144 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:51:35.612716+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:51:35.613567+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_wc1a3hdm/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:51:35.613700+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:51:36.038000+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44144 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:51:38.070473+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:51:38.071197+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper__8sxetif/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:51:38.071373+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:51:38.622710+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44144 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:52:38.637394+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:52:38.638711+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_h_ykwp29/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:52:38.638798+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:52:39.298753+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:52:40.308290+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:52:40.308916+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_1nehusa_/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:52:40.308997+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:52:40.802860+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:52:42.826251+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:52:42.827441+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_7yrt9ycf/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:52:42.827494+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:52:43.360368+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:38324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:53:43.382632+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:53:43.384873+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_x_x72dpx/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:53:43.384957+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:53:43.989102+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44206 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:53:44.996131+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:53:44.996474+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_vr5d8y31/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:53:44.996513+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:53:45.566835+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44206 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:53:47.579531+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:53:47.580289+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_xkaiwc7s/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:53:47.580382+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:53:48.046241+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44206 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:54:48.055231+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:54:48.061557+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_vlycxal4/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:54:48.061781+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:54:48.681683+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44036 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:54:49.688495+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:54:49.689247+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_e4yfix56/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:54:49.689361+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:54:50.354808+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44036 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:54:52.373930+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:54:52.374579+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_9twpxhh1/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:54:52.374647+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:54:52.978206+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:44036 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:55:52.989831+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:55:52.996204+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_rkjhqzwb/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:55:52.996457+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:55:53.689553+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:55:54.723448+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:55:54.724357+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_e4vtjur3/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:55:54.724435+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:55:55.126503+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:55:57.149844+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:55:57.150573+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_3943tbi8/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:55:57.150655+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:55:57.715144+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:55324 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:56:57.731977+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:56:57.739618+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_5em2di7q/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:56:57.739772+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:56:58.353564+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46614 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:56:59.366511+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:56:59.366926+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_fs37lju3/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:56:59.366976+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:56:59.853510+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46614 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:57:01.863535+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:57:01.864025+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_c03436w_/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:57:01.864071+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:57:02.388317+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:46614 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:58:02.397994+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:58:02.400355+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_o1g3gf68/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:58:02.400419+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:58:03.022812+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34684 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:58:04.039072+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:58:04.040444+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_a2d30fnw/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:58:04.040627+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:58:04.503517+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34684 - "POST /process-message HTTP/1.1" 500 Internal Server Error
+{"timestamp": "2026-04-28T15:58:06.524424+00:00", "level": "INFO", "logger": "app.api.routes", "message": "Received message from 120363356487766968@g.us | text=no | audio=yes"}
+{"timestamp": "2026-04-28T15:58:06.525094+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Transcribing audio: /tmp/whisper_4xwawhol/audio_A571F1946D2825483B2042BAB1A81D16.ogg"}
+{"timestamp": "2026-04-28T15:58:06.525172+00:00", "level": "INFO", "logger": "app.services.whisper_service", "message": "Loading Whisper model: base"}
+{"timestamp": "2026-04-28T15:58:07.026645+00:00", "level": "ERROR", "logger": "app.api.routes", "message": "Whisper transcription failed: Numpy is not available"}
+INFO:     172.20.0.3:34684 - "POST /process-message HTTP/1.1" 500 Internal Server Error

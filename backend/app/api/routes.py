@@ -2,6 +2,7 @@ from typing import Optional
 import os
 import json
 import hashlib
+import re
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
@@ -14,6 +15,15 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 _MESSAGE_DEDUPE_CACHE: dict[str, float] = {}
+_ACK_ONLY_RE = re.compile(
+    r"^(?:"
+    r"(?:ok|okay|okk|okkk|d['’]?accord|oui|yes|merci|thanks|thank you|c['’]?est bon|cest bon|"
+    r"parfait|super|top|bien reçu|bien recu|reçu|recu|vu|noté|note|validé|valide|"
+    r"je check(?:e)?(?: plus tard)?|hello|salut)"
+    r"(?:[\s,;:!?.-]+)?"
+    r")+?$",
+    re.IGNORECASE,
+)
 
 
 def _normalize_text_for_dedupe(text: str) -> str:
@@ -40,6 +50,23 @@ def _is_duplicate_recent_message(sender_id: str, raw_text: str) -> bool:
     if previous_ts is None:
         return False
     return (now_ts - previous_ts) <= dedupe_window_seconds
+
+
+def _is_non_action_message(raw_text: str) -> bool:
+    """
+    Ignore short acknowledgements/validation-only messages so they never become tasks.
+    """
+    normalized = _normalize_text_for_dedupe(raw_text)
+    if not normalized:
+        return True
+    if len(normalized) <= 3:
+        return True
+
+    token_count = len(normalized.split())
+    if token_count <= 6 and _ACK_ONLY_RE.fullmatch(normalized):
+        return True
+
+    return False
 
 
 def _store_transcript(
@@ -142,6 +169,19 @@ async def process_message(
     raw_text = text
     _store_transcript(sender_id, sender_participant_jid, transcription_source, raw_text)
     logger.info(f"Stored transcript for {sender_id}: {raw_text}")
+    if _is_non_action_message(raw_text):
+        logger.info(
+            "Acknowledgment/validation-only message detected. Skipping AI extraction and Teamwork task creation."
+        )
+        return {
+            "status": "ignored_non_action",
+            "sender_id": sender_id,
+            "raw_text": raw_text,
+            "transcription_source": transcription_source,
+            "task": None,
+            "teamwork_response": None,
+        }
+
     if _is_duplicate_recent_message(sender_id, raw_text):
         logger.info(
             "Duplicate message detected. Skipping AI extraction and Teamwork task creation."
