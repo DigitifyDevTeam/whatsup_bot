@@ -70,6 +70,74 @@ Tag disambiguation:
   - minor visual/content tweak => "QFIX"
   - technical implementation/integration/logic change => "Custom DEV"."""
 
+SYSTEM_PROMPT_MULTI_TASKS = """You are an AI assistant for a digital agency.
+
+Context:
+- You work for a web-development agency team.
+- Client messages are primarily requests about building, fixing, or improving web applications and e-commerce flows.
+- Your output is used directly by a dev/ops/content team in project management.
+- Primary project context: all client messages are about refonte or maintenance for a PrestaShop e-commerce website: https://originecbd.fr/
+- Assume requests refer to this store unless the message explicitly says otherwise.
+- Use this context to disambiguate vague phrases (products, pages, checkout, shipping, SEO, visuals, etc.) toward PrestaShop e-commerce operations.
+
+Your job is to extract one or multiple structured tasks from a single client message.
+
+You must return ONLY valid JSON.
+
+Schema:
+{
+  "tasks": [
+    {
+      "title": "short task title",
+      "description": "clear detailed description",
+      "client_request": "original intent",
+      "deadline": "ISO date or null",
+      "priority": "P0 | P1 | P2",
+      "tag": "Gestion de catalogue | QFIX | Demande SEO | Custom DEV",
+      "subtasks": ["short actionable sub-task in French", "..."]
+    }
+  ]
+}
+
+Critical splitting rules:
+- If the message talks about the SAME subject/feature/page and contains multiple actions, return ONE task only.
+- If the message contains DIFFERENT independent subjects, return one task per subject.
+- Never split into multiple tasks just because sentence count is high.
+- Never merge clearly unrelated subjects into one task.
+- If uncertain, prefer fewer tasks (merge) unless subjects are clearly different.
+
+Rules:
+- Do not add explanations
+- Do not add text outside JSON
+- Infer missing fields when possible
+- If unknown, use null
+- IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
+- IMPORTANT: Never output English for any textual field.
+- IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
+- IMPORTANT: Only include `subtasks` when the client explicitly lists actions (bullets, numbering, or explicit separators).
+- IMPORTANT: Never invent, infer, paraphrase, or expand subtasks from intent.
+- IMPORTANT: If the message is not explicitly enumerated, return `subtasks` as an empty array [].
+
+Priority rules:
+- P0 = Critique, response < 1 hour, blocking incidents (payment, delivery, cart, server/product unavailable)
+- P1 = Majeur, response < 2 hours, key feature impacted (emails, relay points, loyalty points)
+- P2 = Mineur, response < 24 hours, non-blocking issue
+
+Tag rules:
+- "Gestion de catalogue": CRUD products, facets/filters, brands, product content
+- "QFIX": quick fixes and promo/banner/menu/image adjustments
+- "Demande SEO": SEO pages, blog articles, on-page optimizations
+- "Custom DEV": new feature development, process changes, module/config updates
+
+Tag disambiguation:
+- If message mentions SEO/content/blog/meta/title/maillage/landing: prefer "Demande SEO".
+- If message mentions product data/catalogue/filtres/facettes/marques/attributs/variation: prefer "Gestion de catalogue".
+- If message mentions quick UI/content patch like banner/promo visuel/image/menu/text correction: prefer "QFIX".
+- If message mentions integration/API/module/workflow/business logic/payment/shipping/rules/new capability: prefer "Custom DEV".
+- When in doubt between "QFIX" and "Custom DEV":
+  - minor visual/content tweak => "QFIX"
+  - technical implementation/integration/logic change => "Custom DEV"."""
+
 TRANSLATE_TO_FRENCH_PROMPT = """You are a translation assistant.
 
 Task:
@@ -135,6 +203,22 @@ async def extract_task(message: str) -> TaskData:
     return await _extract_task_with_model(endpoint, model, message)
 
 
+async def extract_tasks(message: str) -> list[TaskData]:
+    """
+    Extract one or multiple tasks from the same client message.
+    If multi-task extraction fails, fallback to single-task extraction.
+    """
+    endpoint = os.getenv("LLAMA_ENDPOINT", "http://localhost:11434").rstrip("/")
+    model = _get_llama_model()
+    try:
+        return await _extract_tasks_with_model(endpoint, model, message)
+    except ValueError as e:
+        logger.warning(
+            f"Multi-task extraction failed, fallback to single-task mode: {e}"
+        )
+        return [await _extract_task_with_model(endpoint, model, message)]
+
+
 async def _extract_task_with_model(endpoint: str, model: str, message: str) -> TaskData:
     for attempt in range(1, 3):
         raw_text = await _call_ollama_chat(
@@ -160,6 +244,53 @@ async def _extract_task_with_model(endpoint: str, model: str, message: str) -> T
     raise ValueError("Unreachable")
 
 
+async def _extract_tasks_with_model(
+    endpoint: str, model: str, message: str
+) -> list[TaskData]:
+    for attempt in range(1, 3):
+        raw_text = await _call_ollama_chat(
+            endpoint,
+            model,
+            message,
+            use_json_format=True,
+            system_prompt=SYSTEM_PROMPT_MULTI_TASKS,
+        )
+        raw_json = _extract_json_object(raw_text)
+        try:
+            parsed = json.loads(raw_json)
+            raw_tasks = parsed.get("tasks")
+            if not isinstance(raw_tasks, list) or not raw_tasks:
+                raise ValueError("Missing or empty tasks array")
+
+            validated_tasks: list[TaskData] = []
+            for raw_task in raw_tasks:
+                if not isinstance(raw_task, dict):
+                    continue
+                task = TaskData(**raw_task)
+                task = _normalize_task(task, message)
+                validated_tasks.append(task)
+
+            deduped_tasks = _dedupe_tasks(validated_tasks)
+            if not deduped_tasks:
+                raise ValueError("No valid tasks parsed from tasks array")
+
+            logger.info(
+                f"Tasks extracted successfully on attempt {attempt} ({model}) count={len(deduped_tasks)}"
+            )
+            return deduped_tasks
+        except (ValueError, TypeError) as e:
+            logger.warning(
+                f"Attempt {attempt}: Failed to parse multi-task LLM output: {e}. "
+                f"Raw output: {raw_text[:500]}"
+            )
+            if attempt == 2:
+                raise ValueError(
+                    f"Multi-task LLM output failed validation after 2 attempts: {e}"
+                ) from e
+
+    raise ValueError("Unreachable")
+
+
 def _extract_json_object(text: str) -> str:
     """Take first {...} block from model output (handles markdown fences)."""
     s = text.strip()
@@ -176,6 +307,18 @@ def _extract_json_object(text: str) -> str:
     if first == -1 or last == -1 or last <= first:
         return s
     return s[first : last + 1]
+
+
+def _dedupe_tasks(tasks: list[TaskData]) -> list[TaskData]:
+    deduped: list[TaskData] = []
+    seen: set[str] = set()
+    for task in tasks:
+        key = " ".join([task.tag, task.title.strip().lower(), task.client_request.strip().lower()])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(task)
+    return deduped
 
 
 def _normalize_task(task: TaskData, source_message: str) -> TaskData:

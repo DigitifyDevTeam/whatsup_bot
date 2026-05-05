@@ -44,16 +44,6 @@ _THANKS_ONLY_RE = re.compile(
     r")+?$",
     re.IGNORECASE,
 )
-_QUESTION_START_RE = re.compile(
-    r"^(?:"
-    r"qui|que|qu['’]est-ce que|qu['’]est ce que|quoi|quand|ou|où|"
-    r"pourquoi|comment|combien|est-ce que|est ce que|peux-tu|peut-tu|"
-    r"tu peux|vous pouvez|on peut|dois-je|doit-on|is it|can you|could you"
-    r")\b",
-    re.IGNORECASE,
-)
-
-
 def _normalize_text_for_dedupe(text: str) -> str:
     return " ".join((text or "").strip().lower().split())
 
@@ -93,11 +83,17 @@ def _is_non_action_message(raw_text: str) -> bool:
     token_count = len(normalized.split())
     if _THANKS_ONLY_RE.fullmatch(normalized):
         return True
-    # User requirement: any question should not create a task.
-    if "?" in raw_text:
-        return True
-    if token_count <= 14 and _QUESTION_START_RE.match(normalized):
-        return True
+    # Keep tiny acknowledgment-questions non-action (e.g. "ok ?", "d'accord ?", "merci ?").
+    if "?" in raw_text and token_count <= 3:
+        question_stripped = _normalize_text_for_dedupe(
+            re.sub(r"[?!.;,:\-]+", " ", normalized)
+        )
+        if (
+            _ACK_ONLY_RE.fullmatch(question_stripped)
+            or _THANKS_ONLY_RE.fullmatch(question_stripped)
+            or _LOW_SIGNAL_PHRASES_RE.fullmatch(question_stripped)
+        ):
+            return True
     if token_count <= 6 and _ACK_ONLY_RE.fullmatch(normalized):
         return True
     if token_count <= 12 and _LOW_SIGNAL_PHRASES_RE.fullmatch(normalized):
@@ -148,6 +144,10 @@ def _is_low_signal_extracted_task(raw_text: str, task: TaskData) -> bool:
         return True
     overlap_ratio = len(source_tokens & generated_tokens) / len(source_tokens)
     return overlap_ratio < 0.35
+
+
+def _filter_low_signal_tasks(raw_text: str, tasks: list[TaskData]) -> list[TaskData]:
+    return [task for task in tasks if not _is_low_signal_extracted_task(raw_text, task)]
 
 
 def _store_transcript(
@@ -293,11 +293,12 @@ async def process_message(
         }
 
     try:
-        task: TaskData = await ai_service.extract_task(text)
-        logger.info(f"Extracted task: {task.model_dump_json()}")
-        if _is_low_signal_extracted_task(raw_text, task):
+        extracted_tasks: list[TaskData] = await ai_service.extract_tasks(text)
+        logger.info(f"Extracted {len(extracted_tasks)} task(s)")
+        tasks = _filter_low_signal_tasks(raw_text, extracted_tasks)
+        if not tasks:
             logger.info(
-                "Low-signal message detected after AI extraction. Skipping Teamwork task creation."
+                "All extracted tasks were low-signal. Skipping Teamwork task creation."
             )
             return {
                 "status": "ignored_low_signal_after_ai",
@@ -305,10 +306,15 @@ async def process_message(
                 "raw_text": raw_text,
                 "transcription_source": transcription_source,
                 "task": None,
+                "tasks": [],
                 "teamwork_response": None,
+                "teamwork_responses": [],
             }
-        _store_task_output(sender_id, sender_participant_jid, transcription_source, raw_text, task)
-        logger.info(f"Stored structured task output for {sender_id}")
+        for task in tasks:
+            _store_task_output(
+                sender_id, sender_participant_jid, transcription_source, raw_text, task
+            )
+        logger.info(f"Stored {len(tasks)} structured task output(s) for {sender_id}")
     except ValueError as e:
         logger.error(f"Task extraction failed: {e}")
         detail = str(e)
@@ -343,18 +349,22 @@ async def process_message(
     )
     skip_teamwork = os.getenv("SKIP_TEAMWORK", "false").lower() == "true" or not has_teamwork_config
     if skip_teamwork:
-        logger.info("SKIP_TEAMWORK=true, returning extracted task without Teamwork API call")
+        logger.info("SKIP_TEAMWORK=true, returning extracted task(s) without Teamwork API call")
         return {
             "status": "ok_ai_only",
             "sender_id": sender_id,
             "raw_text": raw_text,
             "transcription_source": transcription_source,
-            "task": task.model_dump(),
+            "task": tasks[0].model_dump(),
+            "tasks": [task.model_dump() for task in tasks],
             "teamwork_response": None,
+            "teamwork_responses": [],
         }
 
     try:
-        teamwork_response = await teamwork_service.create_task(task)
+        teamwork_responses: list[dict] = []
+        for task in tasks:
+            teamwork_responses.append(await teamwork_service.create_task(task))
     except Exception as e:
         logger.error(f"Teamwork API failed: {e}")
         raise HTTPException(status_code=502, detail=f"Teamwork API failed: {e}")
@@ -364,8 +374,10 @@ async def process_message(
         "sender_id": sender_id,
         "raw_text": raw_text,
         "transcription_source": transcription_source,
-        "task": task.model_dump(),
-        "teamwork_response": teamwork_response,
+        "task": tasks[0].model_dump(),
+        "tasks": [task.model_dump() for task in tasks],
+        "teamwork_response": teamwork_responses[0],
+        "teamwork_responses": teamwork_responses,
     }
 
 
