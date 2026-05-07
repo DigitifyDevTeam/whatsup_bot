@@ -42,7 +42,11 @@ Rules:
 - Do not add explanations
 - Do not add text outside JSON
 - Infer missing fields when possible
-- If unknown, use null
+- If unknown:
+  - `deadline` may be null
+  - `subtasks` must be []
+  - `priority` MUST be one of: P0, P1, P2 (pick the most likely)
+  - `tag` MUST be one of: Gestion de catalogue, QFIX, Demande SEO, Custom DEV (pick the most likely)
 - IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
 - IMPORTANT: Never output English for any textual field.
 - IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
@@ -110,7 +114,11 @@ Rules:
 - Do not add explanations
 - Do not add text outside JSON
 - Infer missing fields when possible
-- If unknown, use null
+- If unknown:
+  - `deadline` may be null
+  - `subtasks` must be []
+  - `priority` MUST be one of: P0, P1, P2 (pick the most likely)
+  - `tag` MUST be one of: Gestion de catalogue, QFIX, Demande SEO, Custom DEV (pick the most likely)
 - IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
 - IMPORTANT: Never output English for any textual field.
 - IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
@@ -175,7 +183,6 @@ def _clean_french_translation_output(text: str) -> str:
         colon_index = cleaned.find(":", marker_index)
         if colon_index != -1 and colon_index + 1 < len(cleaned):
             cleaned = cleaned[colon_index + 1 :].strip()
-            lower_cleaned = cleaned.lower()
             break
 
     # If model still keeps an intro before a quoted translation, keep only quoted body.
@@ -227,6 +234,8 @@ async def _extract_task_with_model(endpoint: str, model: str, message: str) -> T
         raw_json = _extract_json_object(raw_text)
         try:
             parsed = json.loads(raw_json)
+            if not isinstance(parsed, dict) or not parsed:
+                raise ValueError("Empty JSON object returned by LLM")
             task = TaskData(**parsed)
             task = _normalize_task(task, message)
             logger.info(f"Task extracted successfully on attempt {attempt} ({model})")
@@ -258,6 +267,8 @@ async def _extract_tasks_with_model(
         raw_json = _extract_json_object(raw_text)
         try:
             parsed = json.loads(raw_json)
+            if not isinstance(parsed, dict) or not parsed:
+                raise ValueError("Empty JSON object returned by LLM")
             raw_tasks = parsed.get("tasks")
             if not isinstance(raw_tasks, list) or not raw_tasks:
                 raise ValueError("Missing or empty tasks array")
@@ -518,8 +529,13 @@ async def _call_ollama_chat(
         async with httpx.AsyncClient(timeout=180.0) as client:
             return await _post_ollama_chat(client, url, payload, use_json_format)
     except httpx.RequestError as e:
-        logger.error(f"Ollama request failed: {e}")
-        raise ValueError(f"Cannot reach Ollama at {endpoint}: {e}") from e
+        # httpx errors sometimes stringify to empty; include type + repr + stack.
+        logger.error(
+            f"Ollama request failed ({type(e).__name__}): {e!r}", exc_info=True
+        )
+        raise ValueError(
+            f"Cannot reach Ollama at {endpoint}: {type(e).__name__}: {e!r}"
+        ) from e
 
 
 async def _post_ollama_chat(

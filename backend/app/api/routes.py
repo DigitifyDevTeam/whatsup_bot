@@ -234,11 +234,17 @@ async def process_message(
 
             target_language = os.getenv("AUDIO_OUTPUT_LANGUAGE", "fr").strip().lower()
             if target_language in {"fr", "french", "francais", "français"}:
-                translated_text = await ai_service.translate_to_french(text)
-                if translated_text:
-                    text = translated_text
-                    transcription_source = "audio_whisper_translated_fr"
-                    logger.info(f"French transcript for {sender_id}: {text[:100]}...")
+                try:
+                    translated_text = await ai_service.translate_to_french(text)
+                    if translated_text:
+                        text = translated_text
+                        transcription_source = "audio_whisper_translated_fr"
+                        logger.info(f"French transcript for {sender_id}: {text[:100]}...")
+                except Exception as e:
+                    # Translation is a best-effort enhancement; do not fail the whole request.
+                    logger.warning(
+                        f"Audio translation failed (continuing with raw transcript): {e}"
+                    )
         except Exception as e:
             logger.error(f"Whisper transcription failed: {e}")
             raise HTTPException(status_code=500, detail=f"Transcription failed: {e}")
