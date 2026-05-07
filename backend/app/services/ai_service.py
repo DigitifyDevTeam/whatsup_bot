@@ -535,11 +535,22 @@ async def _call_ollama_chat(
         payload["format"] = "json"
 
     try:
-        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "45"))
-        connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "5"))
+        # Ollama can legitimately take >45s on CPU / first-run / large prompts.
+        # Make timeouts configurable and default to a more forgiving value.
+        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "180"))
+        connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "10"))
         timeout = httpx.Timeout(timeout_seconds, connect=connect_seconds)
         async with httpx.AsyncClient(timeout=timeout) as client:
-            return await _post_ollama_chat(client, url, payload, use_json_format)
+            for attempt in range(1, 3):
+                try:
+                    return await _post_ollama_chat(client, url, payload, use_json_format)
+                except httpx.ReadTimeout as e:
+                    # Retry once: Ollama may be loading the model / busy.
+                    if attempt == 2:
+                        raise
+                    logger.warning(
+                        f"Ollama read timeout on attempt {attempt}; retrying once with same timeout={timeout_seconds}s"
+                    )
     except httpx.RequestError as e:
         # httpx errors sometimes stringify to empty; include type + repr + stack.
         logger.error(
