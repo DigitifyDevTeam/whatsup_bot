@@ -13,6 +13,11 @@ TAG_QFIX = "QFIX"
 TAG_DEMANDE_SEO = "Demande SEO"
 TAG_CUSTOM_DEV = "Custom DEV"
 
+
+class OllamaUnavailableError(ValueError):
+    """Raised when Ollama cannot be reached or times out."""
+
+
 SYSTEM_PROMPT = """You are an AI assistant for a digital agency.
 
 Context:
@@ -219,6 +224,10 @@ async def extract_tasks(message: str) -> list[TaskData]:
     model = _get_llama_model()
     try:
         return await _extract_tasks_with_model(endpoint, model, message)
+    except OllamaUnavailableError:
+        # If Ollama is down/slow, don't "fallback" to single-task because it would
+        # just repeat the same call and block the request longer.
+        raise
     except ValueError as e:
         logger.warning(
             f"Multi-task extraction failed, fallback to single-task mode: {e}"
@@ -526,14 +535,17 @@ async def _call_ollama_chat(
         payload["format"] = "json"
 
     try:
-        async with httpx.AsyncClient(timeout=180.0) as client:
+        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "45"))
+        connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "5"))
+        timeout = httpx.Timeout(timeout_seconds, connect=connect_seconds)
+        async with httpx.AsyncClient(timeout=timeout) as client:
             return await _post_ollama_chat(client, url, payload, use_json_format)
     except httpx.RequestError as e:
         # httpx errors sometimes stringify to empty; include type + repr + stack.
         logger.error(
             f"Ollama request failed ({type(e).__name__}): {e!r}", exc_info=True
         )
-        raise ValueError(
+        raise OllamaUnavailableError(
             f"Cannot reach Ollama at {endpoint}: {type(e).__name__}: {e!r}"
         ) from e
 
