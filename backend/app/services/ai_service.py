@@ -535,11 +535,17 @@ async def _call_ollama_chat(
         payload["format"] = "json"
 
     try:
-        # Ollama can legitimately take >45s on CPU / first-run / large prompts.
-        # Make timeouts configurable and default to a more forgiving value.
-        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "180"))
+        # Ollama on CPU (8B) often needs several minutes per /api/chat; 180s was
+        # closing the client while the model was still generating (Ollama then logs
+        # "aborting completion request due to client closing the connection").
+        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
         connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "10"))
-        timeout = httpx.Timeout(timeout_seconds, connect=connect_seconds)
+        timeout = httpx.Timeout(
+            connect=connect_seconds,
+            read=timeout_seconds,
+            write=timeout_seconds,
+            pool=timeout_seconds,
+        )
         async with httpx.AsyncClient(timeout=timeout) as client:
             for attempt in range(1, 3):
                 try:

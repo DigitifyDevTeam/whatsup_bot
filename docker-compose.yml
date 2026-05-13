@@ -79,6 +79,8 @@ services:
       # Override .env values to use Docker DNS (service name)
       LLAMA_ENDPOINT: "http://ollama:11434"
       PYTHONUNBUFFERED: "1"
+      # CPU inference: allow long single /api/chat responses (see bridge BACKEND_TIMEOUT_MS)
+      OLLAMA_TIMEOUT_SECONDS: "600"
     volumes:
       # Live source mount so --reload picks up changes
       - ./backend/app:/app/app
@@ -108,6 +110,8 @@ services:
       # Override .env values to use Docker DNS (service name)
       API_URL: "http://backend:8000"
       WHATSAPP_SESSION_PATH: "/app/auth_state"
+      # Whisper + several Ollama calls; default must exceed worst-case backend time
+      BACKEND_TIMEOUT_MS: "3600000"
     volumes:
       # Live source mount (optional, comment out for stricter prod immutability)
       - ./bridge/src:/app/src

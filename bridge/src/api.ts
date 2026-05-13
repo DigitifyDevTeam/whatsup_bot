@@ -6,7 +6,8 @@ import { logger } from "./logger";
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
-const BACKEND_TIMEOUT_MS = Number(process.env.BACKEND_TIMEOUT_MS || 300_000);
+/** Voice notes = Whisper + multiple Ollama calls; must exceed backend OLLAMA_TIMEOUT_SECONDS × retries. */
+const BACKEND_TIMEOUT_MS = Number(process.env.BACKEND_TIMEOUT_MS || 3_600_000);
 
 export async function sendToBackend(msg: QueueMessage): Promise<void> {
   if (process.env.SKIP_BACKEND === "true") {
