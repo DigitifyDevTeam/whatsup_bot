@@ -1,4 +1,5 @@
 from typing import Optional
+import asyncio
 import os
 import json
 import hashlib
@@ -222,29 +223,17 @@ async def process_message(
 
     text = message
     transcription_source = "text"
+    transcription_result: whisper_service.TranscriptionResult | None = None
 
     if audio_file:
         try:
             audio_data = await audio_file.read()
-            text = await whisper_service.transcribe_upload(
+            transcription_result = await whisper_service.transcribe_upload(
                 audio_data, audio_file.filename or "audio.ogg"
             )
+            text = transcription_result.text
             transcription_source = "audio_whisper"
             logger.info(f"Transcribed audio for {sender_id}: {text[:100]}...")
-
-            target_language = os.getenv("AUDIO_OUTPUT_LANGUAGE", "fr").strip().lower()
-            if target_language in {"fr", "french", "francais", "français"}:
-                try:
-                    translated_text = await ai_service.translate_to_french(text)
-                    if translated_text:
-                        text = translated_text
-                        transcription_source = "audio_whisper_translated_fr"
-                        logger.info(f"French transcript for {sender_id}: {text[:100]}...")
-                except Exception as e:
-                    # Translation is a best-effort enhancement; do not fail the whole request.
-                    logger.warning(
-                        f"Audio translation failed (continuing with raw transcript): {e}"
-                    )
         except Exception as e:
             logger.error(f"Whisper transcription failed: {e}")
             raise HTTPException(status_code=500, detail=f"Transcription failed: {e}")
@@ -252,103 +241,131 @@ async def process_message(
     if not text:
         raise HTTPException(status_code=400, detail="No message content provided")
 
-    # Keep a plain-text copy for clients that need raw transcription output.
-    raw_text = text
-    _store_transcript(sender_id, sender_participant_jid, transcription_source, raw_text)
-    logger.info(f"Stored transcript for {sender_id}: {raw_text}")
-    if _is_non_action_message(raw_text):
-        logger.info(
-            "Acknowledgment/validation-only message detected. Skipping AI extraction and Teamwork task creation."
-        )
-        return {
-            "status": "ignored_non_action",
-            "sender_id": sender_id,
-            "raw_text": raw_text,
-            "transcription_source": transcription_source,
-            "task": None,
-            "teamwork_response": None,
-        }
-
-    if _is_duplicate_recent_message(sender_id, raw_text):
-        logger.info(
-            "Duplicate message detected. Skipping AI extraction and Teamwork task creation."
-        )
-        return {
-            "status": "duplicate_ignored",
-            "sender_id": sender_id,
-            "raw_text": raw_text,
-            "transcription_source": transcription_source,
-            "task": None,
-            "teamwork_response": None,
-        }
+    target_language = os.getenv("AUDIO_OUTPUT_LANGUAGE", "fr").strip().lower()
+    wants_french_output = target_language in {"fr", "french", "francais", "français"}
 
     whisper_only = os.getenv("WHISPER_ONLY", "false").lower() == "true"
     fallback_to_transcript = (
         os.getenv("FALLBACK_TO_TRANSCRIPT_ON_AI_ERROR", "true").lower() == "true"
     )
+    tasks: list[TaskData] = []
 
-    if whisper_only:
-        logger.info("WHISPER_ONLY=true, returning raw text without AI extraction")
-        return {
-            "status": "ok_transcription_only",
-            "sender_id": sender_id,
-            "raw_text": raw_text,
-            "transcription_source": transcription_source,
-            "task": None,
-            "teamwork_response": None,
-        }
-
-    try:
-        extracted_tasks: list[TaskData] = await ai_service.extract_tasks(text)
-        logger.info(f"Extracted {len(extracted_tasks)} task(s)")
-        tasks = _filter_low_signal_tasks(raw_text, extracted_tasks)
-        if not tasks:
-            logger.info(
-                "All extracted tasks were low-signal. Skipping Teamwork task creation."
-            )
-            return {
-                "status": "ignored_low_signal_after_ai",
-                "sender_id": sender_id,
-                "raw_text": raw_text,
-                "transcription_source": transcription_source,
-                "task": None,
-                "tasks": [],
-                "teamwork_response": None,
-                "teamwork_responses": [],
-            }
-        for task in tasks:
-            _store_task_output(
-                sender_id, sender_participant_jid, transcription_source, raw_text, task
-            )
-        logger.info(f"Stored {len(tasks)} structured task output(s) for {sender_id}")
-    except ValueError as e:
-        logger.error(f"Task extraction failed: {e}")
-        detail = str(e)
-        if "memory" in detail.lower() and (
-            "ollama" in detail.lower() or "model requires" in detail.lower()
+    async with ai_service.ollama_back_to_back_session():
+        if (
+            transcription_result
+            and wants_french_output
+            and not whisper_service.should_skip_french_translation(transcription_result)
         ):
-            raise HTTPException(
-                status_code=503,
-                detail=(
-                    f"{detail} "
-                    "Free RAM or use a smaller model (e.g. `ollama pull llama3.2:3b` "
-                    "then set LLAMA_MODEL=llama3.2:3b or LLAMA_FALLBACK_MODEL=llama3.2:3b)."
-                ),
+            try:
+                translated_text = await ai_service.translate_to_french(text)
+                if translated_text:
+                    text = translated_text
+                    transcription_source = "audio_whisper_translated_fr"
+                    logger.info(f"French transcript for {sender_id}: {text[:100]}...")
+            except Exception as e:
+                logger.warning(
+                    f"Audio translation failed (continuing with raw transcript): {e}"
+                )
+        elif transcription_result and wants_french_output:
+            logger.info(
+                f"Skipping French translation for {sender_id}: "
+                f"Whisper detected fr (p={transcription_result.language_probability})"
             )
-        if fallback_to_transcript:
-            logger.warning(
-                "FALLBACK_TO_TRANSCRIPT_ON_AI_ERROR=true, returning raw text after AI failure"
+
+        raw_text = text
+        _store_transcript(sender_id, sender_participant_jid, transcription_source, raw_text)
+        logger.info(f"Stored transcript for {sender_id}: {raw_text}")
+
+        if _is_non_action_message(raw_text):
+            logger.info(
+                "Acknowledgment/validation-only message detected. "
+                "Skipping AI extraction and Teamwork task creation."
             )
             return {
-                "status": "ok_transcription_fallback",
+                "status": "ignored_non_action",
                 "sender_id": sender_id,
                 "raw_text": raw_text,
                 "transcription_source": transcription_source,
                 "task": None,
                 "teamwork_response": None,
-                "ai_error": detail,
             }
-        raise HTTPException(status_code=422, detail=f"Task extraction failed: {e}")
+
+        if _is_duplicate_recent_message(sender_id, raw_text):
+            logger.info(
+                "Duplicate message detected. Skipping AI extraction and Teamwork task creation."
+            )
+            return {
+                "status": "duplicate_ignored",
+                "sender_id": sender_id,
+                "raw_text": raw_text,
+                "transcription_source": transcription_source,
+                "task": None,
+                "teamwork_response": None,
+            }
+
+        if whisper_only:
+            logger.info("WHISPER_ONLY=true, returning raw text without AI extraction")
+            return {
+                "status": "ok_transcription_only",
+                "sender_id": sender_id,
+                "raw_text": raw_text,
+                "transcription_source": transcription_source,
+                "task": None,
+                "teamwork_response": None,
+            }
+
+        try:
+            extracted_tasks: list[TaskData] = await ai_service.extract_tasks(text)
+            logger.info(f"Extracted {len(extracted_tasks)} task(s)")
+            tasks = _filter_low_signal_tasks(raw_text, extracted_tasks)
+            if not tasks:
+                logger.info(
+                    "All extracted tasks were low-signal. Skipping Teamwork task creation."
+                )
+                return {
+                    "status": "ignored_low_signal_after_ai",
+                    "sender_id": sender_id,
+                    "raw_text": raw_text,
+                    "transcription_source": transcription_source,
+                    "task": None,
+                    "tasks": [],
+                    "teamwork_response": None,
+                    "teamwork_responses": [],
+                }
+            for task in tasks:
+                _store_task_output(
+                    sender_id, sender_participant_jid, transcription_source, raw_text, task
+                )
+            logger.info(f"Stored {len(tasks)} structured task output(s) for {sender_id}")
+        except ValueError as e:
+            logger.error(f"Task extraction failed: {e}")
+            detail = str(e)
+            if "memory" in detail.lower() and (
+                "ollama" in detail.lower() or "model requires" in detail.lower()
+            ):
+                raise HTTPException(
+                    status_code=503,
+                    detail=(
+                        f"{detail} "
+                        "Free RAM or use a smaller model (e.g. `ollama pull llama3.2:3b` "
+                        "then set LLAMA_MODEL=llama3.2:3b or LLAMA_FALLBACK_MODEL=llama3.2:3b)."
+                    ),
+                )
+            if fallback_to_transcript:
+                logger.warning(
+                    "FALLBACK_TO_TRANSCRIPT_ON_AI_ERROR=true, "
+                    "returning raw text after AI failure"
+                )
+                return {
+                    "status": "ok_transcription_fallback",
+                    "sender_id": sender_id,
+                    "raw_text": raw_text,
+                    "transcription_source": transcription_source,
+                    "task": None,
+                    "teamwork_response": None,
+                    "ai_error": detail,
+                }
+            raise HTTPException(status_code=422, detail=f"Task extraction failed: {e}")
 
     has_teamwork_config = bool(os.getenv("TEAMWORK_DOMAIN")) and bool(
         os.getenv("TEAMWORK_PROJECT_ID")
@@ -368,9 +385,11 @@ async def process_message(
         }
 
     try:
-        teamwork_responses: list[dict] = []
-        for task in tasks:
-            teamwork_responses.append(await teamwork_service.create_task(task))
+        teamwork_responses = list(
+            await asyncio.gather(
+                *[teamwork_service.create_task(task) for task in tasks]
+            )
+        )
     except Exception as e:
         logger.error(f"Teamwork API failed: {e}")
         raise HTTPException(status_code=502, detail=f"Teamwork API failed: {e}")

@@ -1,7 +1,10 @@
+import asyncio
+import gc
 import os
 import tempfile
 import shutil
 import subprocess
+from dataclasses import dataclass
 
 import whisper  # type: ignore[import-untyped]
 
@@ -9,8 +12,16 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
+@dataclass(frozen=True)
+class TranscriptionResult:
+    text: str
+    detected_language: str | None = None
+    language_probability: float | None = None
+
 _model = None
 _ffmpeg_bootstrapped = False
+_whisper_lock = asyncio.Lock()
 
 
 def _ensure_ffmpeg_available() -> None:
@@ -66,6 +77,32 @@ def _ensure_ffmpeg_available() -> None:
     _ffmpeg_bootstrapped = True
 
 
+def _unload_after_transcribe() -> bool:
+    """When true, drop the Whisper model from RAM after each job (idle = no weights in memory)."""
+    return os.getenv("WHISPER_UNLOAD_AFTER_TRANSCRIBE", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
+def _unload_model() -> None:
+    global _model
+    if _model is None:
+        return
+    del _model
+    _model = None
+    gc.collect()
+    try:
+        import torch  # type: ignore[import-untyped]
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except ImportError:
+        pass
+    logger.info("Whisper model unloaded from memory")
+
+
 def _get_model() -> whisper.Whisper:
     global _model
     if _model is None:
@@ -76,33 +113,77 @@ def _get_model() -> whisper.Whisper:
     return _model
 
 
-async def transcribe(file_path: str) -> str:
+def should_skip_french_translation(result: TranscriptionResult) -> bool:
+    """
+    Skip the Ollama translation step when Whisper detected French with high confidence.
+    Does not change transcription settings; only avoids a redundant LLM pass.
+    """
+    if not _env_truthy("SKIP_FRENCH_TRANSLATION_IF_DETECTED_FR", default=True):
+        return False
+    if result.detected_language != "fr":
+        return False
+    if result.language_probability is None:
+        return False
+    min_prob = _float_env("SKIP_FRENCH_TRANSLATION_MIN_PROB", 0.85)
+    return result.language_probability >= min_prob
+
+
+def _detect_spoken_language(model: whisper.Whisper, audio_path: str) -> tuple[str, float]:
+    audio = whisper.load_audio(audio_path)
+    audio = whisper.pad_or_trim(audio)
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+    _, probs = model.detect_language(mel)
+    language = max(probs, key=probs.get)
+    return language, float(probs[language])
+
+
+async def transcribe(file_path: str) -> TranscriptionResult:
     """Transcribe an audio file to text using Whisper."""
     logger.info(f"Transcribing audio: {file_path}")
 
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Audio file not found: {file_path}")
 
-    _ensure_ffmpeg_available()
-    model = _get_model()
+    detected_language: str | None = None
+    language_probability: float | None = None
 
-    processed_path = _preprocess_audio_for_whisper(file_path)
-    try:
-        transcribe_options = _build_transcribe_options()
-        result = model.transcribe(processed_path, **transcribe_options)
-        text = result["text"].strip()
-    finally:
-        if processed_path != file_path:
+    async with _whisper_lock:
+        _ensure_ffmpeg_available()
+        model = _get_model()
+        processed_path = _preprocess_audio_for_whisper(file_path)
+        try:
             try:
-                os.remove(processed_path)
-            except OSError:
-                pass
+                detected_language, language_probability = _detect_spoken_language(
+                    model, processed_path
+                )
+                logger.info(
+                    f"Whisper language detection: {detected_language} "
+                    f"(p={language_probability:.3f})"
+                )
+            except Exception as exc:
+                logger.warning(f"Whisper language detection failed: {exc}")
+
+            transcribe_options = _build_transcribe_options()
+            result = model.transcribe(processed_path, **transcribe_options)
+            text = result["text"].strip()
+        finally:
+            if processed_path != file_path:
+                try:
+                    os.remove(processed_path)
+                except OSError:
+                    pass
+            if _unload_after_transcribe():
+                _unload_model()
 
     logger.info(f"Transcription complete: {len(text)} characters")
-    return text
+    return TranscriptionResult(
+        text=text,
+        detected_language=detected_language,
+        language_probability=language_probability,
+    )
 
 
-async def transcribe_upload(upload_data: bytes, filename: str) -> str:
+async def transcribe_upload(upload_data: bytes, filename: str) -> TranscriptionResult:
     """Transcribe uploaded audio bytes."""
     tmp_dir = tempfile.mkdtemp(prefix="whisper_")
     tmp_path = os.path.join(tmp_dir, filename)
@@ -195,3 +276,8 @@ def _float_env(name: str, default: float) -> float:
     except ValueError:
         logger.warning(f"Invalid {name}={raw!r}, using default {default}")
         return default
+
+
+def _env_truthy(name: str, *, default: bool) -> bool:
+    raw = (os.getenv(name) or ("true" if default else "false")).strip().lower()
+    return raw in {"1", "true", "yes", "on"}

@@ -1,6 +1,8 @@
 import os
 import json
 import re
+from contextlib import asynccontextmanager
+from contextvars import ContextVar
 
 import httpx
 
@@ -8,6 +10,11 @@ from app.models.task import TaskData
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+_ollama_keep_alive_override: ContextVar[int | str | None] = ContextVar(
+    "ollama_keep_alive_override", default=None
+)
+_ollama_http_client: httpx.AsyncClient | None = None
 TAG_GESTION_CATALOGUE = "Gestion de catalogue"
 TAG_QFIX = "QFIX"
 TAG_DEMANDE_SEO = "Demande SEO"
@@ -514,6 +521,51 @@ def _infer_tag(source_message: str, task: TaskData) -> str:
     return best_tag
 
 
+@asynccontextmanager
+async def ollama_back_to_back_session():
+    """
+    Keep the Ollama model loaded across multiple /api/chat calls in one request
+    (e.g. translate then extract). Does not change prompts or decoding quality.
+    """
+    raw = (os.getenv("OLLAMA_PIPELINE_KEEP_ALIVE") or "2m").strip()
+    if raw.lower() in {"0", "off", "false", "no"}:
+        yield
+        return
+    token = _ollama_keep_alive_override.set(_parse_keep_alive_value(raw))
+    try:
+        yield
+    finally:
+        _ollama_keep_alive_override.reset(token)
+
+
+def _get_ollama_http_client() -> httpx.AsyncClient:
+    global _ollama_http_client
+    if _ollama_http_client is None or _ollama_http_client.is_closed:
+        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
+        connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "10"))
+        timeout = httpx.Timeout(
+            connect=connect_seconds,
+            read=timeout_seconds,
+            write=timeout_seconds,
+            pool=timeout_seconds,
+        )
+        _ollama_http_client = httpx.AsyncClient(timeout=timeout)
+    return _ollama_http_client
+
+
+def _build_ollama_options(*, use_json_format: bool) -> dict:
+    """Inference options that improve speed/consistency without shrinking the model."""
+    if not use_json_format:
+        return {}
+    raw = (os.getenv("OLLAMA_TEMPERATURE") or "0").strip()
+    try:
+        temperature = float(raw)
+    except ValueError:
+        logger.warning(f"Invalid OLLAMA_TEMPERATURE={raw!r}, using 0")
+        temperature = 0.0
+    return {"temperature": temperature}
+
+
 async def _call_ollama_chat(
     endpoint: str,
     model: str,
@@ -530,33 +582,26 @@ async def _call_ollama_chat(
             {"role": "user", "content": message},
         ],
         "stream": False,
+        "keep_alive": _get_ollama_keep_alive(),
     }
+    options = _build_ollama_options(use_json_format=use_json_format)
+    if options:
+        payload["options"] = options
     if use_json_format:
         payload["format"] = "json"
 
+    client = _get_ollama_http_client()
+    timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
     try:
-        # Ollama on CPU (8B) often needs several minutes per /api/chat; 180s was
-        # closing the client while the model was still generating (Ollama then logs
-        # "aborting completion request due to client closing the connection").
-        timeout_seconds = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "600"))
-        connect_seconds = float(os.getenv("OLLAMA_CONNECT_TIMEOUT_SECONDS", "10"))
-        timeout = httpx.Timeout(
-            connect=connect_seconds,
-            read=timeout_seconds,
-            write=timeout_seconds,
-            pool=timeout_seconds,
-        )
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            for attempt in range(1, 3):
-                try:
-                    return await _post_ollama_chat(client, url, payload, use_json_format)
-                except httpx.ReadTimeout as e:
-                    # Retry once: Ollama may be loading the model / busy.
-                    if attempt == 2:
-                        raise
-                    logger.warning(
-                        f"Ollama read timeout on attempt {attempt}; retrying once with same timeout={timeout_seconds}s"
-                    )
+        for attempt in range(1, 3):
+            try:
+                return await _post_ollama_chat(client, url, payload, use_json_format)
+            except httpx.ReadTimeout:
+                if attempt == 2:
+                    raise
+                logger.warning(
+                    f"Ollama read timeout on attempt {attempt}; retrying once with same timeout={timeout_seconds}s"
+                )
     except httpx.RequestError as e:
         # httpx errors sometimes stringify to empty; include type + repr + stack.
         logger.error(
@@ -622,3 +667,25 @@ async def translate_to_french(text: str) -> str:
 def _get_llama_model() -> str:
     """Use exactly one Ollama model, no fallback chain."""
     return (os.getenv("LLAMA_MODEL") or "llama3.1:8b").strip()
+
+
+def _parse_keep_alive_value(raw: str) -> int | str:
+    if raw == "0":
+        return 0
+    if raw.isdigit():
+        return int(raw)
+    return raw
+
+
+def _get_ollama_keep_alive() -> int | str:
+    """
+    Ollama keeps the model in memory after each /api/chat for this duration.
+    Use 0 to unload as soon as the response finishes (frees RAM/VRAM between requests).
+    Use a duration like 120 (seconds) or 2m to keep the model warm across back-to-back calls.
+    `ollama_back_to_back_session()` overrides this per request via OLLAMA_PIPELINE_KEEP_ALIVE.
+    """
+    override = _ollama_keep_alive_override.get()
+    if override is not None:
+        return override
+    raw = (os.getenv("OLLAMA_KEEP_ALIVE") or "0").strip()
+    return _parse_keep_alive_value(raw)
