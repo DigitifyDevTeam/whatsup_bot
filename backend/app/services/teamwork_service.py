@@ -197,10 +197,11 @@ def _extract_teamwork_error_detail(response: httpx.Response) -> str:
 
 
 @async_retry(max_retries=3, base_delay=2.0, exceptions=(httpx.HTTPError,))
-async def create_task(task: TaskData) -> dict:
+async def create_task(task: TaskData, source_message: str) -> dict:
     """Create a task in Teamwork Projects."""
     _assert_create_only_mode()
     task = _sanitize_task_for_teamwork(task)
+    verbatim_message = (source_message or "").strip()
 
     domain = os.getenv("TEAMWORK_DOMAIN", "")
     project_id = os.getenv("TEAMWORK_PROJECT_ID", "")
@@ -212,11 +213,12 @@ async def create_task(task: TaskData) -> dict:
         tasklist_id = await _resolve_tasklist_id(client, domain, project_id)
         url = f"https://{domain}/projects/api/v3/tasklists/{tasklist_id}/tasks.json"
 
+        description_body = verbatim_message or task.description.strip()
         task_payload: dict = {
             "task": {
                 "name": f"[{task.tag}] {task.title}",
                 "description": (
-                    f"[Tag: {task.tag}] [Priority: {task.priority}]\n\n{task.description}"
+                    f"[Tag: {task.tag}] [Priority: {task.priority}]\n\n{description_body}"
                 ),
                 "priority": PRIORITY_MAP.get(task.priority, "medium"),
             }

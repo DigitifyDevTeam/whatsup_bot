@@ -137,7 +137,9 @@ def _is_low_signal_extracted_task(raw_text: str, task: TaskData) -> bool:
         tok
         for tok in re.findall(
             r"\w+",
-            _normalize_text_for_dedupe(f"{task.title} {task.description} {task.client_request}"),
+            _normalize_text_for_dedupe(
+                f"{task.title} {' '.join(task.subtasks)}"
+            ),
         )
         if len(tok) >= 3
     }
@@ -387,7 +389,10 @@ async def process_message(
     try:
         teamwork_responses = list(
             await asyncio.gather(
-                *[teamwork_service.create_task(task) for task in tasks]
+                *[
+                    teamwork_service.create_task(task, source_message=raw_text)
+                    for task in tasks
+                ]
             )
         )
     except Exception as e:

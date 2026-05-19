@@ -35,19 +35,21 @@ Context:
 - Assume requests refer to this store unless the message explicitly says otherwise.
 - Use this context to disambiguate vague phrases (products, pages, checkout, shipping, SEO, visuals, etc.) toward PrestaShop e-commerce operations.
 
-Your job is to extract structured task data from client messages with reliable categorization.
+Your job is to extract structured task metadata and actionable work items from client messages.
+
+The original client message is stored verbatim in Teamwork. Do NOT rewrite it in `description` or `client_request`.
 
 You must return ONLY valid JSON.
 
 Schema:
 {
-  "title": "short task title",
-  "description": "clear detailed description",
-  "client_request": "original intent",
+  "title": "short task title for the team (French)",
+  "description": "",
+  "client_request": "",
   "deadline": "ISO date or null",
   "priority": "P0 | P1 | P2",
   "tag": "Gestion de catalogue | QFIX | Demande SEO | Custom DEV",
-  "subtasks": ["short actionable sub-task in French", "..."]
+  "subtasks": ["actionable work item for the dev team", "..."]
 }
 
 Rules:
@@ -56,15 +58,16 @@ Rules:
 - Infer missing fields when possible
 - If unknown:
   - `deadline` may be null
-  - `subtasks` must be []
   - `priority` MUST be one of: P0, P1, P2 (pick the most likely)
   - `tag` MUST be one of: Gestion de catalogue, QFIX, Demande SEO, Custom DEV (pick the most likely)
-- IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
+- IMPORTANT: Always set `description` and `client_request` to empty strings "".
+- IMPORTANT: Never speak about "le client" in third person. Subtasks are for the internal team.
+- IMPORTANT: `title` MUST be in French only (short, no full message copy).
 - IMPORTANT: Never output English for any textual field.
-- IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
-- IMPORTANT: Only include `subtasks` when the client explicitly lists actions (bullets, numbering, or explicit separators).
-- IMPORTANT: Never invent, infer, paraphrase, or expand subtasks from intent.
-- IMPORTANT: If the message is not explicitly enumerated, return `subtasks` as an empty array [].
+- IMPORTANT: `subtasks` lists concrete actions the team should do, inferred from the message.
+- IMPORTANT: Write each subtask in French, imperative/infinitive form (e.g. "Vérifier …", "Mettre à jour …").
+- IMPORTANT: Prefer 1-5 subtasks when the message contains clear asks; use [] only for pure acknowledgments with no work.
+- IMPORTANT: Do not paraphrase the whole message into subtasks; split distinct actionable items only.
 
 Priority rules:
 - P0 = Critique, response < 1 hour, blocking incidents (payment, delivery, cart, server/product unavailable)
@@ -98,19 +101,21 @@ Context:
 
 Your job is to extract one or multiple structured tasks from a single client message.
 
+The original client message is stored verbatim in Teamwork. Do NOT rewrite it in `description` or `client_request`.
+
 You must return ONLY valid JSON.
 
 Schema:
 {
   "tasks": [
     {
-      "title": "short task title",
-      "description": "clear detailed description",
-      "client_request": "original intent",
+      "title": "short task title for the team (French)",
+      "description": "",
+      "client_request": "",
       "deadline": "ISO date or null",
       "priority": "P0 | P1 | P2",
       "tag": "Gestion de catalogue | QFIX | Demande SEO | Custom DEV",
-      "subtasks": ["short actionable sub-task in French", "..."]
+      "subtasks": ["actionable work item for the dev team", "..."]
     }
   ]
 }
@@ -128,15 +133,16 @@ Rules:
 - Infer missing fields when possible
 - If unknown:
   - `deadline` may be null
-  - `subtasks` must be []
   - `priority` MUST be one of: P0, P1, P2 (pick the most likely)
   - `tag` MUST be one of: Gestion de catalogue, QFIX, Demande SEO, Custom DEV (pick the most likely)
-- IMPORTANT: `title`, `description`, and `client_request` MUST be written in French only.
+- IMPORTANT: Always set `description` and `client_request` to empty strings "".
+- IMPORTANT: Never speak about "le client" in third person. Subtasks are for the internal team.
+- IMPORTANT: `title` MUST be in French only (short, no full message copy).
 - IMPORTANT: Never output English for any textual field.
-- IMPORTANT: `subtasks` must be EXTRACTIVE ONLY from explicit client text.
-- IMPORTANT: Only include `subtasks` when the client explicitly lists actions (bullets, numbering, or explicit separators).
-- IMPORTANT: Never invent, infer, paraphrase, or expand subtasks from intent.
-- IMPORTANT: If the message is not explicitly enumerated, return `subtasks` as an empty array [].
+- IMPORTANT: `subtasks` lists concrete actions the team should do, inferred from the message.
+- IMPORTANT: Write each subtask in French, imperative/infinitive form (e.g. "Vérifier …", "Mettre à jour …").
+- IMPORTANT: Prefer 1-5 subtasks when the message contains clear asks; use [] only for pure acknowledgments with no work.
+- IMPORTANT: Do not paraphrase the whole message into subtasks; split distinct actionable items only.
 
 Priority rules:
 - P0 = Critique, response < 1 hour, blocking incidents (payment, delivery, cart, server/product unavailable)
@@ -366,10 +372,22 @@ def _normalize_task(task: TaskData, source_message: str) -> TaskData:
         normalized_subtasks.append(cleaned)
 
     explicit_subtasks = _extract_explicit_subtasks(source_message)
-    final_subtasks = explicit_subtasks if explicit_subtasks else []
+    if normalized_subtasks:
+        final_subtasks = normalized_subtasks
+    elif explicit_subtasks:
+        final_subtasks = explicit_subtasks
+    else:
+        final_subtasks = []
 
     corrected_tag = _infer_tag(source_message, task)
-    return task.model_copy(update={"subtasks": final_subtasks, "tag": corrected_tag})
+    return task.model_copy(
+        update={
+            "subtasks": final_subtasks,
+            "tag": corrected_tag,
+            "description": "",
+            "client_request": "",
+        }
+    )
 
 
 def _extract_explicit_subtasks(source_message: str) -> list[str]:
