@@ -63,6 +63,38 @@ services:
         echo "Model ready."
     restart: "no"
 
+  # Self-healing guard: ensures the Ollama model is always present.
+  # If the model is removed (volume prune / docker reset / corruption), it will be re-pulled automatically.
+  ollama_model_guard:
+    image: ollama/ollama:latest
+    container_name: whatsbot_ollama_model_guard
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+      OLLAMA_GUARD_MODEL: "llama3.1:8b"
+      OLLAMA_GUARD_INTERVAL_SECONDS: "300"
+    volumes:
+      - ollama_models:/root/.ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        MODEL="${OLLAMA_GUARD_MODEL:-llama3.1:8b}"
+        INTERVAL="${OLLAMA_GUARD_INTERVAL_SECONDS:-300}"
+        echo "Ollama model guard started (model=$MODEL, interval=${INTERVAL}s)"
+        while true; do
+          if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$MODEL"; then
+            echo "OK: model present: $MODEL"
+          else
+            echo "MISSING: model not present, pulling: $MODEL"
+            ollama pull "$MODEL" || true
+          fi
+          sleep "$INTERVAL"
+        done
+
   backend:
     build:
       context: ./backend

@@ -19,6 +19,7 @@ TAG_GESTION_CATALOGUE = "Gestion de catalogue"
 TAG_QFIX = "QFIX"
 TAG_DEMANDE_SEO = "Demande SEO"
 TAG_CUSTOM_DEV = "Custom DEV"
+_MODEL_NOT_FOUND_RE = re.compile(r"model\s+'([^']+)'\s+not\s+found", re.IGNORECASE)
 
 
 class OllamaUnavailableError(ValueError):
@@ -643,6 +644,28 @@ async def _post_ollama_chat(
     if response.status_code >= 400:
         body = (response.text or "")[:2000]
         logger.error(f"Ollama HTTP {response.status_code} at {url}: {body}")
+
+        # If the configured model is missing (common after recreating the Ollama container
+        # without its volume), try a safe fallback to any locally installed model.
+        missing_model = _parse_missing_model_error(body)
+        if response.status_code == 404 and missing_model:
+            fallback = await _choose_fallback_ollama_model(client, url, missing_model)
+            if fallback and fallback != payload.get("model"):
+                logger.warning(
+                    f"Ollama model {missing_model!r} not found; retrying with fallback model {fallback!r}"
+                )
+                payload_fallback = dict(payload)
+                payload_fallback["model"] = fallback
+                response_fallback = await client.post(url, json=payload_fallback)
+                if response_fallback.status_code < 400:
+                    data_fb = response_fallback.json()
+                    msg_fb = data_fb.get("message") or {}
+                    return (msg_fb.get("content") or "").strip()
+                body_fb = (response_fallback.text or "")[:2000]
+                logger.error(
+                    f"Ollama fallback model {fallback!r} failed HTTP {response_fallback.status_code}: {body_fb}"
+                )
+
         if use_json_format and "format" in payload:
             logger.info("Retrying Ollama without format=json")
             payload_no_fmt = {k: v for k, v in payload.items() if k != "format"}
@@ -663,6 +686,69 @@ async def _post_ollama_chat(
     data = response.json()
     msg = data.get("message") or {}
     return (msg.get("content") or "").strip()
+
+
+def _parse_missing_model_error(body: str) -> str | None:
+    """
+    Ollama returns: {"error":"model 'llama3.1:8b' not found"}
+    """
+    if not body:
+        return None
+    match = _MODEL_NOT_FOUND_RE.search(body)
+    if not match:
+        return None
+    return match.group(1).strip() or None
+
+
+async def _choose_fallback_ollama_model(
+    client: httpx.AsyncClient, url: str, missing_model: str
+) -> str | None:
+    """
+    Pick a model that exists locally in Ollama (/api/tags).
+
+    Priority:
+    1) OLLAMA_FALLBACK_MODEL, if set and present.
+    2) LLAMA_FALLBACK_MODEL, if set and present.
+    3) The first available installed model.
+    """
+    tags_url = url.replace("/api/chat", "/api/tags")
+    try:
+        resp = await client.get(tags_url)
+    except httpx.RequestError:
+        return None
+    if resp.status_code >= 400:
+        return None
+    try:
+        data = resp.json()
+    except ValueError:
+        return None
+    models = data.get("models")
+    if not isinstance(models, list):
+        return None
+
+    available: list[str] = []
+    for m in models:
+        if not isinstance(m, dict):
+            continue
+        name = (m.get("name") or "").strip()
+        if name:
+            available.append(name)
+
+    if not available:
+        logger.error(
+            f"Ollama model {missing_model!r} not found and no installed models were returned by /api/tags"
+        )
+        return None
+
+    preferred = (os.getenv("OLLAMA_FALLBACK_MODEL") or os.getenv("LLAMA_FALLBACK_MODEL") or "").strip()
+    if preferred and preferred in available:
+        return preferred
+
+    # Avoid immediately retrying the same missing model if it appears for any reason.
+    for name in available:
+        if name != missing_model:
+            return name
+    return available[0]
 
 
 async def translate_to_french(text: str) -> str:
