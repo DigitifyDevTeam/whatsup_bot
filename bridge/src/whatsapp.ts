@@ -23,102 +23,131 @@ const CP437_EXTENDED_CHARS =
   "└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀" +
   "αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ";
 
-export async function startWhatsApp(queue: MessageQueue): Promise<void> {
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getMessage(
+  _key: WAMessageKey
+): Promise<proto.IMessage | undefined> {
+  return undefined;
+}
+
+export async function startWhatsApp(queue: MessageQueue): Promise<never> {
   const sessionPath = process.env.WHATSAPP_SESSION_PATH || "./auth_state";
   const processOwnMessages = process.env.PROCESS_OWN_MESSAGES === "true";
   const onlyGroupName = (process.env.ONLY_GROUP_NAME || "").trim().toLowerCase();
   const onlySenderJid = normalizeJid((process.env.ONLY_SENDER_JID || "").trim());
   const onlySenderName = (process.env.ONLY_SENDER_NAME || "").trim().toLowerCase();
   const groupNameCache = new Map<string, string>();
+  const reconnectBaseMs = Number(process.env.WHATSAPP_RECONNECT_BASE_MS || "2000");
+  const reconnectMaxMs = Number(process.env.WHATSAPP_RECONNECT_MAX_MS || "60000");
+  let reconnectBackoffMs = reconnectBaseMs;
 
   if (!fs.existsSync(sessionPath)) {
     fs.mkdirSync(sessionPath, { recursive: true });
   }
 
-  const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
-  const { version } = await fetchLatestBaileysVersion();
+  while (true) {
+    const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+    const { version } = await fetchLatestBaileysVersion();
 
-  const sock = makeWASocket({
-    version,
-    logger: silentLogger as any,
-    auth: {
-      creds: state.creds,
-      // Keep Signal/crypto internals quiet to avoid noisy session dumps.
-      keys: makeCacheableSignalKeyStore(state.keys, silentLogger as any),
-    },
-    getMessage,
-  });
+    let resolveClosed: (() => void) | undefined;
+    const closed = new Promise<void>((resolve) => {
+      resolveClosed = resolve;
+    });
 
-  sock.ev.process(async (events) => {
-    if (events["connection.update"]) {
-      const { connection, lastDisconnect, qr } = events["connection.update"];
+    const sock = makeWASocket({
+      version,
+      logger: silentLogger as any,
+      auth: {
+        creds: state.creds,
+        // Keep Signal/crypto internals quiet to avoid noisy session dumps.
+        keys: makeCacheableSignalKeyStore(state.keys, silentLogger as any),
+      },
+      getMessage,
+    });
 
-      if (qr) {
-        logger.info("QR received. Scan it in WhatsApp > Linked Devices.");
-        qrcode.generate(qr, { small: true });
-      }
+    sock.ev.process(async (events) => {
+      if (events["connection.update"]) {
+        const { connection, lastDisconnect, qr } = events["connection.update"];
 
-      if (connection === "close") {
-        const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-        if (statusCode !== DisconnectReason.loggedOut) {
-          logger.info("Connection closed, reconnecting...");
-          await startWhatsApp(queue);
-        } else {
-          logger.warn(
-            { sessionPath },
-            "Logged out from WhatsApp. Clearing session and reconnecting for fresh QR."
-          );
-          clearSessionState(sessionPath);
-          await startWhatsApp(queue);
+        if (qr) {
+          logger.info("QR received. Scan it in WhatsApp > Linked Devices.");
+          qrcode.generate(qr, { small: true });
+        }
+
+        if (connection === "open") {
+          reconnectBackoffMs = reconnectBaseMs;
+          logger.info("WhatsApp connection established");
+        }
+
+        if (connection === "close") {
+          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+          if (statusCode === DisconnectReason.loggedOut) {
+            logger.warn(
+              { sessionPath },
+              "Logged out from WhatsApp. Clearing session and reconnecting for fresh QR."
+            );
+            clearSessionState(sessionPath);
+            reconnectBackoffMs = reconnectBaseMs;
+          } else {
+            logger.info(
+              { backoffMs: reconnectBackoffMs },
+              "Connection closed, reconnecting..."
+            );
+          }
+          try {
+            sock.end(undefined);
+          } catch {
+            // Socket may already be torn down.
+          }
+          resolveClosed?.();
         }
       }
 
-      if (connection === "open") {
-        logger.info("WhatsApp connection established");
+      if (events["creds.update"]) {
+        await saveCreds();
       }
-    }
 
-    if (events["creds.update"]) {
-      await saveCreds();
-    }
+      if (events["messages.upsert"]) {
+        const upsert = events["messages.upsert"];
+        if (upsert.type !== "notify") return;
 
-    if (events["messages.upsert"]) {
-      const upsert = events["messages.upsert"];
-      if (upsert.type !== "notify") return;
+        for (const msg of upsert.messages) {
+          if (msg.key.fromMe && !processOwnMessages) continue;
+          if (
+            !(await shouldProcessMessage(
+              msg,
+              sock,
+              onlyGroupName,
+              onlySenderJid,
+              onlySenderName,
+              groupNameCache
+            ))
+          ) {
+            continue;
+          }
 
-      for (const msg of upsert.messages) {
-        if (msg.key.fromMe && !processOwnMessages) continue;
-        if (
-          !(await shouldProcessMessage(
-            msg,
-            sock,
-            onlyGroupName,
-            onlySenderJid,
-            onlySenderName,
-            groupNameCache
-          ))
-        ) {
-          continue;
-        }
-
-        try {
-          logger.info(
-            {
-              sender_id: msg.key.participant || msg.key.remoteJid || "unknown",
-              message_type: getContentType(unwrapMessage(msg.message) || {}) || "unknown",
-            },
-            "Incoming message captured"
-          );
-          await handleMessage(msg, sock, queue);
-        } catch (err) {
-          logger.error({ err, messageId: msg.key.id }, "Failed to handle message");
+          try {
+            logger.info(
+              {
+                sender_id: msg.key.participant || msg.key.remoteJid || "unknown",
+                message_type: getContentType(unwrapMessage(msg.message) || {}) || "unknown",
+              },
+              "Incoming message captured"
+            );
+            await handleMessage(msg, sock, queue);
+          } catch (err) {
+            logger.error({ err, messageId: msg.key.id }, "Failed to handle message");
+          }
         }
       }
-    }
-  });
+    });
 
-  async function getMessage(key: WAMessageKey): Promise<proto.IMessage | undefined> {
-    return undefined;
+    await closed;
+    await sleep(reconnectBackoffMs);
+    reconnectBackoffMs = Math.min(reconnectBackoffMs * 2, reconnectMaxMs);
   }
 }
 

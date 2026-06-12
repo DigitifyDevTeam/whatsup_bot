@@ -20,6 +20,7 @@ TAG_QFIX = "QFIX"
 TAG_DEMANDE_SEO = "Demande SEO"
 TAG_CUSTOM_DEV = "Custom DEV"
 _MODEL_NOT_FOUND_RE = re.compile(r"model\s+'([^']+)'\s+not\s+found", re.IGNORECASE)
+_OLLAMA_TRUNCATION_SUFFIX = "\n\n[... message truncated for processing ...]"
 
 
 class OllamaUnavailableError(ValueError):
@@ -585,6 +586,24 @@ def _build_ollama_options(*, use_json_format: bool) -> dict:
     return {"temperature": temperature}
 
 
+def _truncate_for_ollama(text: str) -> str:
+    """Cap user payload size so huge pastes (email headers, abuse reports) do not block Ollama for minutes."""
+    raw_limit = (os.getenv("OLLAMA_MAX_INPUT_CHARS") or "12000").strip()
+    try:
+        max_chars = int(raw_limit)
+    except ValueError:
+        logger.warning(f"Invalid OLLAMA_MAX_INPUT_CHARS={raw_limit!r}, using 12000")
+        max_chars = 12000
+    if max_chars <= 0 or len(text) <= max_chars:
+        return text
+    suffix = _OLLAMA_TRUNCATION_SUFFIX
+    keep = max(0, max_chars - len(suffix))
+    logger.warning(
+        f"Truncating Ollama input from {len(text)} to {keep + len(suffix)} chars"
+    )
+    return text[:keep] + suffix
+
+
 async def _call_ollama_chat(
     endpoint: str,
     model: str,
@@ -593,6 +612,7 @@ async def _call_ollama_chat(
     use_json_format: bool,
     system_prompt: str,
 ) -> str:
+    message = _truncate_for_ollama(message)
     url = f"{endpoint}/api/chat"
     payload: dict = {
         "model": model,

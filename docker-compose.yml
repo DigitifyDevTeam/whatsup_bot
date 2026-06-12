@@ -82,17 +82,17 @@ services:
     command:
       - |
         set -e
-        MODEL="${OLLAMA_GUARD_MODEL:-llama3.1:8b}"
-        INTERVAL="${OLLAMA_GUARD_INTERVAL_SECONDS:-300}"
-        echo "Ollama model guard started (model=$MODEL, interval=${INTERVAL}s)"
+        MODEL="$${OLLAMA_GUARD_MODEL:-llama3.1:8b}"
+        INTERVAL="$${OLLAMA_GUARD_INTERVAL_SECONDS:-300}"
+        echo "Ollama model guard started (model=$$MODEL, interval=$${INTERVAL}s)"
         while true; do
-          if ollama list 2>/dev/null | awk '{print $1}' | grep -qx "$MODEL"; then
-            echo "OK: model present: $MODEL"
+          if ollama list 2>/dev/null | awk '{print $$1}' | grep -qx "$$MODEL"; then
+            echo "OK: model present: $$MODEL"
           else
-            echo "MISSING: model not present, pulling: $MODEL"
-            ollama pull "$MODEL" || true
+            echo "MISSING: model not present, pulling: $$MODEL"
+            ollama pull "$$MODEL" || true
           fi
-          sleep "$INTERVAL"
+          sleep "$$INTERVAL"
         done
 
   backend:
