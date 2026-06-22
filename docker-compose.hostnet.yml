@@ -1,0 +1,32 @@
+# Fallback when bridge networking fails (iptables DOCKER-FORWARD missing).
+# All services share the host network — no custom bridge is created.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.hostnet.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.hostnet.yml logs -f bridge
+
+services:
+  ollama:
+    network_mode: host
+    ports: []
+
+  ollama_init:
+    network_mode: host
+    environment:
+      OLLAMA_HOST: "http://127.0.0.1:11434"
+
+  ollama_model_guard:
+    network_mode: host
+    environment:
+      OLLAMA_HOST: "http://127.0.0.1:11434"
+
+  backend:
+    network_mode: host
+    ports: []
+    environment:
+      LLAMA_ENDPOINT: "http://127.0.0.1:11434"
+
+  bridge:
+    network_mode: host
+    environment:
+      API_URL: "http://127.0.0.1:8000"
