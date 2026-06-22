@@ -23,6 +23,18 @@ const CP437_EXTENDED_CHARS =
   "└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀" +
   "αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ";
 
+// Disconnect status codes that mean the current session credentials can no
+// longer be used. Retrying with them loops forever, so we clear the session
+// and re-pair via QR instead.
+const TERMINAL_DISCONNECT_CODES = new Set<number>([
+  DisconnectReason.loggedOut, // 401
+  DisconnectReason.badSession, // 500
+  DisconnectReason.forbidden, // 403
+  DisconnectReason.connectionReplaced, // 440
+  DisconnectReason.multideviceMismatch, // 411
+  405, // not authorized / unauthorized pairing
+]);
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -56,6 +68,8 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
     const closed = new Promise<void>((resolve) => {
       resolveClosed = resolve;
     });
+    // Set when a close should reconnect immediately without backoff (e.g. 515).
+    let restartRequired = false;
 
     const sock = makeWASocket({
       version,
@@ -83,17 +97,31 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
         }
 
         if (connection === "close") {
-          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-          if (statusCode === DisconnectReason.loggedOut) {
+          const boomError = lastDisconnect?.error as Boom | undefined;
+          const statusCode = boomError?.output?.statusCode;
+          const errorMessage = boomError?.message;
+
+          if (statusCode === DisconnectReason.restartRequired) {
+            // 515: WhatsApp asks the client to restart the socket immediately
+            // (normal right after a fresh pairing). Reconnect without backoff.
+            restartRequired = true;
+            logger.info(
+              { statusCode, errorMessage },
+              "Restart required, reconnecting immediately..."
+            );
+          } else if (statusCode !== undefined && TERMINAL_DISCONNECT_CODES.has(statusCode)) {
+            // Credentials are no longer valid (logged out, banned, replaced,
+            // bad session, etc.). Retrying with the same creds loops forever,
+            // so clear the session and force a fresh QR pairing.
             logger.warn(
-              { sessionPath },
-              "Logged out from WhatsApp. Clearing session and reconnecting for fresh QR."
+              { statusCode, errorMessage, sessionPath },
+              "Terminal disconnect. Clearing session and reconnecting for fresh QR."
             );
             clearSessionState(sessionPath);
             reconnectBackoffMs = reconnectBaseMs;
           } else {
             logger.info(
-              { backoffMs: reconnectBackoffMs },
+              { statusCode, errorMessage, backoffMs: reconnectBackoffMs },
               "Connection closed, reconnecting..."
             );
           }
@@ -146,6 +174,13 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
     });
 
     await closed;
+
+    if (restartRequired) {
+      // 515 right after pairing: reconnect immediately and reset backoff.
+      reconnectBackoffMs = reconnectBaseMs;
+      continue;
+    }
+
     await sleep(reconnectBackoffMs);
     reconnectBackoffMs = Math.min(reconnectBackoffMs * 2, reconnectMaxMs);
   }

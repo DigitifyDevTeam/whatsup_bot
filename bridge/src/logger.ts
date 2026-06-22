@@ -6,7 +6,6 @@ export const logger = pino({
   messageKey: "message",
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
   formatters: {
-    level: () => ({}),
+    level: (label) => ({ level: label }),
   },
 });
-
