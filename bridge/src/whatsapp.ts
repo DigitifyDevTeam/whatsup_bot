@@ -622,7 +622,19 @@ async function downloadAudio(
 
 function clearSessionState(sessionPath: string): void {
   try {
-    fs.rmSync(sessionPath, { recursive: true, force: true });
+    if (!fs.existsSync(sessionPath)) {
+      return;
+    }
+
+    // Delete contents only — never remove the directory itself.
+    // In Docker, WHATSAPP_SESSION_PATH is a bind mount
+    // (./bridge/auth_state:/app/auth_state), so
+    // fs.rmSync(sessionPath, { recursive: true }) fails with EBUSY
+    // and the bridge keeps reconnecting with invalid credentials.
+    for (const entry of fs.readdirSync(sessionPath)) {
+      fs.rmSync(path.join(sessionPath, entry), { recursive: true, force: true });
+    }
+    logger.info({ sessionPath }, "WhatsApp session folder cleared");
   } catch (err) {
     logger.error({ err, sessionPath }, "Failed to clear WhatsApp session folder");
   }
