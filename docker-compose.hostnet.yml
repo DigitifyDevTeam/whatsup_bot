@@ -39,3 +39,10 @@ services:
     network_mode: host
     environment:
       API_URL: "http://127.0.0.1:8000"
+
+# Do not create whatsup_bot_default. This host's Docker cannot add DOCKER-FORWARD
+# iptables rules, so any new bridge network fails before containers start.
+networks:
+  default:
+    name: host
+    external: true
