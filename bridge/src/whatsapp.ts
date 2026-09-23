@@ -35,8 +35,61 @@ const TERMINAL_DISCONNECT_CODES = new Set<number>([
   405, // not authorized / unauthorized pairing
 ]);
 
+/** Consecutive QR timeout (408) cycles before wiping half-paired session. */
+const MAX_QR_TIMEOUT_CYCLES = Number(process.env.WHATSAPP_MAX_QR_TIMEOUT_CYCLES || "3");
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isQrRefsEnded(statusCode: number | undefined, errorMessage: string | undefined): boolean {
+  if (statusCode === DisconnectReason.timedOut || statusCode === 408) {
+    return true;
+  }
+  return (errorMessage || "").toLowerCase().includes("qr refs attempts ended");
+}
+
+function readSessionRegistered(sessionPath: string): boolean | null {
+  const credsPath = path.join(sessionPath, "creds.json");
+  try {
+    if (!fs.existsSync(credsPath)) return null;
+    const creds = JSON.parse(fs.readFileSync(credsPath, "utf8")) as {
+      registered?: boolean;
+      me?: unknown;
+    };
+    if (typeof creds.registered === "boolean") return creds.registered;
+    return creds.me ? true : false;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Half-paired Baileys state (me/account present but registered=false) causes an
+ * endless QR + 408 loop. Wipe it before opening a socket so pairing can succeed.
+ */
+function clearHalfPairedSessionIfNeeded(sessionPath: string): void {
+  const credsPath = path.join(sessionPath, "creds.json");
+  if (!fs.existsSync(credsPath)) return;
+
+  try {
+    const creds = JSON.parse(fs.readFileSync(credsPath, "utf8")) as {
+      registered?: boolean;
+      me?: unknown;
+      account?: unknown;
+    };
+    const halfPaired =
+      creds.registered === false && (creds.me != null || creds.account != null);
+    if (!halfPaired) return;
+
+    logger.warn(
+      { sessionPath },
+      "Half-paired WhatsApp session detected (registered=false). Clearing for fresh QR."
+    );
+    clearSessionState(sessionPath);
+  } catch (err) {
+    logger.warn({ err, sessionPath }, "Could not inspect WhatsApp session creds");
+  }
 }
 
 async function getMessage(
@@ -54,11 +107,15 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
   const groupNameCache = new Map<string, string>();
   const reconnectBaseMs = Number(process.env.WHATSAPP_RECONNECT_BASE_MS || "2000");
   const reconnectMaxMs = Number(process.env.WHATSAPP_RECONNECT_MAX_MS || "60000");
+  const maxQrTimeoutCycles = Math.max(1, MAX_QR_TIMEOUT_CYCLES);
   let reconnectBackoffMs = reconnectBaseMs;
+  let consecutiveQrTimeouts = 0;
 
   if (!fs.existsSync(sessionPath)) {
     fs.mkdirSync(sessionPath, { recursive: true });
   }
+
+  clearHalfPairedSessionIfNeeded(sessionPath);
 
   while (true) {
     const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
@@ -93,6 +150,7 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
 
         if (connection === "open") {
           reconnectBackoffMs = reconnectBaseMs;
+          consecutiveQrTimeouts = 0;
           logger.info("WhatsApp connection established");
         }
 
@@ -105,6 +163,7 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
             // 515: WhatsApp asks the client to restart the socket immediately
             // (normal right after a fresh pairing). Reconnect without backoff.
             restartRequired = true;
+            consecutiveQrTimeouts = 0;
             logger.info(
               { statusCode, errorMessage },
               "Restart required, reconnecting immediately..."
@@ -119,6 +178,39 @@ export async function startWhatsApp(queue: MessageQueue): Promise<never> {
             );
             clearSessionState(sessionPath);
             reconnectBackoffMs = reconnectBaseMs;
+            consecutiveQrTimeouts = 0;
+          } else if (isQrRefsEnded(statusCode, errorMessage)) {
+            consecutiveQrTimeouts += 1;
+            const registered = readSessionRegistered(sessionPath);
+            const shouldWipe =
+              registered === false || consecutiveQrTimeouts >= maxQrTimeoutCycles;
+
+            if (shouldWipe) {
+              logger.warn(
+                {
+                  statusCode,
+                  errorMessage,
+                  sessionPath,
+                  consecutiveQrTimeouts,
+                  registered,
+                },
+                "QR pairing timed out repeatedly. Clearing session for a clean QR."
+              );
+              clearSessionState(sessionPath);
+              consecutiveQrTimeouts = 0;
+              reconnectBackoffMs = reconnectBaseMs;
+            } else {
+              logger.info(
+                {
+                  statusCode,
+                  errorMessage,
+                  backoffMs: reconnectBackoffMs,
+                  consecutiveQrTimeouts,
+                  maxQrTimeoutCycles,
+                },
+                "QR refs ended, reconnecting..."
+              );
+            }
           } else {
             logger.info(
               { statusCode, errorMessage, backoffMs: reconnectBackoffMs },

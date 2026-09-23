@@ -9,6 +9,15 @@ services:
   ollama:
     network_mode: host
     ports: []
+    environment:
+      # Host-network mode would otherwise bind 11434 on every interface.
+      OLLAMA_HOST: "127.0.0.1:11434"
+
+  ollama_gateway:
+    network_mode: host
+    ports: []
+    environment:
+      OLLAMA_UPSTREAM: 127.0.0.1:11434
 
   ollama_init:
     network_mode: host

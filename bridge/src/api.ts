@@ -55,6 +55,11 @@ export async function sendToBackend(msg: QueueMessage): Promise<void> {
         `Backend request failed (attempt ${attempt}, status=${status || "n/a"}): ${errorMessage}`
       );
 
+      // Client errors (except rate-limit) will not succeed on retry — fail fast.
+      if (status !== undefined && status >= 400 && status < 500 && status !== 429) {
+        break;
+      }
+
       if (attempt < MAX_RETRIES) {
         const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
         await sleep(delay);

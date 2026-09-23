@@ -1,9 +1,10 @@
 # 24/7 production stack for WhatsApp -> Teamwork pipeline.
 # Services:
-#   - ollama       : LLaMA 3.1 8B server (port 11434)
-#   - ollama_init  : one-shot job that pulls llama3.1:8b on first start
-#   - backend      : FastAPI (port 8000), runs uvicorn, logs -> ./backend/logs/backend.log
-#   - bridge       : Node.js WhatsApp listener, logs -> ./bridge/logs/bridge.log
+#   - ollama           : LLaMA 3.1 8B server (localhost:11434 only, no auth)
+#   - ollama_gateway   : public Ollama API (port 11435) — requires Bearer OLLAMA_API_KEY
+#   - ollama_init      : one-shot job that pulls llama3.1:8b on first start
+#   - backend          : FastAPI (port 8000), runs uvicorn, logs -> ./backend/logs/backend.log
+#   - bridge           : Node.js WhatsApp listener, logs -> ./bridge/logs/bridge.log
 #
 # How to view logs:
 #   - Live (any service):   docker compose logs -f backend
@@ -25,7 +26,8 @@ services:
     container_name: whatsbot_ollama
     restart: unless-stopped
     ports:
-      - "11434:11434"
+      # Host-only. LAN/WAN clients must use ollama_gateway:11435 + Bearer token.
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama_models:/root/.ollama
     healthcheck:
@@ -45,6 +47,31 @@ services:
     #         - driver: nvidia
     #           count: all
     #           capabilities: [gpu]
+
+  ollama_gateway:
+    image: caddy:2-alpine
+    container_name: whatsbot_ollama_gateway
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    ports:
+      - "11435:11435"
+    environment:
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:?Set OLLAMA_API_KEY in the project .env}
+      OLLAMA_UPSTREAM: ollama:11434
+      OLLAMA_GATEWAY_PORT: "11435"
+    volumes:
+      - ./ollama-gateway/Caddyfile:/etc/caddy/Caddyfile:ro
+    command:
+      - /bin/sh
+      - -c
+      - |
+        if [ -z "$$OLLAMA_API_KEY" ]; then
+          echo "OLLAMA_API_KEY is required" >&2
+          exit 1
+        fi
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
 
   ollama_init:
     image: ollama/ollama:latest
